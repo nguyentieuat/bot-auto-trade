@@ -38,6 +38,8 @@ router.post('/api/login', async (req, res) => {
             'SELECT * FROM users WHERE username=$1 OR email=$1 OR phone=$1',
             [account]
         );
+
+        console.log("result", result)
         if (result.rows.length === 0) return res.status(400).json({ message: 'Tài khoản không tồn tại' });
 
         const user = result.rows[0];
@@ -51,7 +53,8 @@ router.post('/api/login', async (req, res) => {
             { expiresIn: '1d' }
         );
 
-        res.json({ token, user: { id: user.id, username: user.username } });
+        delete user.password;
+        res.json({ token, user});
     } catch (err) {
         res.status(500).json({ message: 'Lỗi server' });
     }

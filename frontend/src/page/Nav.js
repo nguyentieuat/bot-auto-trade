@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import navItems from './data/navData';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const Nav = () => {
-  const user = JSON.parse(localStorage.getItem('user'));
+  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')));
+  const location = useLocation(); // bắt sự thay đổi đường dẫn để reload user
+
+  useEffect(() => {
+    setUser(JSON.parse(localStorage.getItem('user')));
+  }, [location]); // khi URL thay đổi → load lại user từ localStorage
 
   return (
     <nav className="navbar navbar-expand-lg py-3 fixed-top bg-dark shadow">
@@ -52,7 +57,8 @@ const Nav = () => {
                     className="dropdown-item text-danger"
                     onClick={() => {
                       localStorage.removeItem('user');
-                      window.location.href = '/'; // hoặc dùng navigate('/')
+                      localStorage.removeItem('token');
+                      window.location.href = '/';
                     }}
                   >
                     Đăng xuất
@@ -69,7 +75,6 @@ const Nav = () => {
               <i className="fas fa-user"></i>
             </Link>
           )}
-
         </div>
       </div>
     </nav>

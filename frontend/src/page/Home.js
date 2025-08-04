@@ -1,44 +1,107 @@
-import React from 'react';
-import Nav from './Nav';
-import Footer from './Footer';
+import React, { useRef, useCallback } from 'react';
 import BotDetail from './bot_chart/BotDetail';
 import { useNavigate, useLocation } from 'react-router-dom';
 import MultiCharts from './bot_chart/MultiCharts';
 import axios from 'axios';
 
+const backendUrl = process.env.REACT_APP_API_URL;
+const LIMIT = 4;
+const CACHE_KEY = 'cachedBotData';
+const CACHE_EXPIRE_MS = 6 * 60 * 60 * 1000; // 6 tiếng
+
 function Home() {
   const [allBots, setAllBots] = React.useState([]);
+  const [page, setPage] = React.useState(0);
+  const [hasMore, setHasMore] = React.useState(true);
   const [selectedBot, setSelectedBot] = React.useState(null);
-  const [viewMode, setViewMode] = React.useState(() => {
-    return localStorage.getItem('viewMode') || 'grid';
-  });
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
+  const [viewMode, setViewMode] = React.useState(() => localStorage.getItem('viewMode') || 'grid');
 
+  const observer = useRef();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Save view mode to localStorage
+  // Load viewMode
   React.useEffect(() => {
     localStorage.setItem('viewMode', viewMode);
   }, [viewMode]);
 
-  const API_URL = process.env.REACT_APP_API_URL;
-  // Fetch all bot data once on mount
-  React.useEffect(() => {
-    axios.get(`${API_URL}/api/fbt-data`).then((res) => {
-      const formatted = res.data.map((bot) => ({
-        id: bot.filename,
-        name: bot.filename.replace('.csv', ''),
-        data: bot.data.map((row) => ({
-          date: row.Date || row.Datetime,
-          gain: row.gain,
-          total_gain: row.total_gain,
+  // Fetch 1 page dữ liệu từ server
+  const fetchBotsPage = async (pageIndex) => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`${backendUrl}/api/fbt-data`, {
+        params: { offset: pageIndex * LIMIT, limit: LIMIT },
+      });
+
+      const botsObj = res.data.bots || {};
+      const newBots = Object.entries(botsObj).map(([botName, data], index) => ({
+        id: `${botName}-${pageIndex}-${index}`,
+        name: botName,
+        data: data.map((row) => ({
+          date: row.date || row.Date || row.Datetime,
+          gain: parseFloat(row.gain),
+          total_gain: parseFloat(row.total_gain),
         })),
       }));
-      setAllBots(formatted);
-    });
+
+      const updated = [...(pageIndex === 0 ? [] : allBots), ...newBots];
+      setAllBots(updated);
+      setHasMore(res.data.hasMore);
+      setPage((prev) => prev + 1);
+
+      // Lưu cache nếu là lần đầu (trang 0)
+      if (pageIndex === 0) {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+          timestamp: Date.now(),
+          data: updated,
+        }));
+      }
+
+    } catch (err) {
+      console.error(err);
+      setError('⚠ Failed to load bot data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Lần đầu vào trang -> thử lấy cache
+  React.useEffect(() => {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const { data, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp < CACHE_EXPIRE_MS) {
+        setAllBots(data);
+        setHasMore(false); // Không load thêm nếu dùng cache toàn bộ
+        return;
+      } else {
+        localStorage.removeItem(CACHE_KEY);
+      }
+    }
+
+    fetchBotsPage(0); // Nếu không có cache thì fetch từ đầu
   }, []);
 
-  // Set selected bot if URL is /bots/:name
+  // IntersectionObserver để load thêm
+  const lastBotRef = useCallback(
+    (node) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          fetchBotsPage(page);
+        }
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [loading, hasMore, page]
+  );
+
+  // Route handling
   React.useEffect(() => {
     const match = location.pathname.match(/^\/bots\/(.+)$/);
     if (match && allBots.length > 0) {
@@ -48,26 +111,10 @@ function Home() {
     }
   }, [location.pathname, allBots]);
 
-  // Handle bot click → navigate + set selected
-  const handleBotClick = (bot) => {
-    navigate(`/bots/${bot.name}`);
-    setSelectedBot(bot);
-  };
-
-  // Back to home
-  const handleBack = () => {
-    navigate('/');
-    setSelectedBot(null);
-  };
-
-  // Reset selectedBot when URL is exactly "/"
   React.useEffect(() => {
-    if (location.pathname === '/') {
-      setSelectedBot(null);
-    }
+    if (location.pathname === '/') setSelectedBot(null);
   }, [location.pathname]);
 
-  // Scroll to top on detail view
   React.useEffect(() => {
     if (selectedBot) window.scrollTo(0, 0);
   }, [selectedBot]);
@@ -76,15 +123,13 @@ function Home() {
   const viewModeIcon = viewMode === 'grid' ? 'fa-th' : 'fa-list';
 
   return (
-    <div className="app-container d-flex flex-column min-vh-100">
-
-      <main className="app-content flex-grow-1" style={{ paddingTop: '90px' }}>
+    <div className="app-container d-flex flex-column min-vh-100" style={{ paddingTop: '10px' }}>
+      <main className="app-content flex-grow-1">
         {selectedBot ? (
-          <BotDetail bot={selectedBot} onBack={handleBack} />
+          <BotDetail bot={selectedBot} onBack={() => navigate('/')} />
         ) : (
           <>
-            {/* View mode toggle */}
-            <div className="container text-end force-padding-bot1rem" style={{ paddingBottom: 16 }}>
+            <div className="container text-end" style={{ paddingBottom: 16 }}>
               <div className="dropdown d-inline">
                 <button
                   className="btn btn-sm btn-outline-light dropdown-toggle"
@@ -109,16 +154,17 @@ function Home() {
                 </ul>
               </div>
             </div>
-
-            {/* All charts with click handler */}
             <MultiCharts
-              setSelectedBot={handleBotClick} // Pass click handler
+              setSelectedBot={setSelectedBot}
               viewMode={viewMode}
+              bots={allBots}
+              loading={loading}
+              error={error}
+              lastItemRef={lastBotRef}
             />
           </>
         )}
       </main>
-
     </div>
   );
 }

@@ -6,7 +6,7 @@ const Footer = () => {
     <footer className="app-footer mt-auto">
       <div className="container text-center py-3">
         <small className="copyright">
-          Develop 
+          Develop by nguyentieuat
         </small>
       </div>
     </footer>

@@ -1,15 +1,14 @@
 const jwt = require('jsonwebtoken');
-const SECRET_KEY = 'your_secret_key';
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader?.split(' ')[1]; // 'Bearer <token>'
+  const token = authHeader?.split(' ')[1]; // Bearer <token>
 
-  if (!token) return res.sendStatus(401);
+  if (!token) return res.status(401).json({ message: "Token không hợp lệ" });
 
-  jwt.verify(token, SECRET_KEY, (err, user) => {
-    if (err) return res.sendStatus(403);
-    req.user = user;
+  jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+    if (err) return res.status(403).json({ message: "Xác thực thất bại" });
+    req.user = decoded;
     next();
   });
 };
