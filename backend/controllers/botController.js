@@ -10,3 +10,13 @@ exports.getActiveBots = async (req, res) => {
   }
 };
 
+exports.getBotChanelsByBotName = async (req, res) => {
+  const { botName } = req.params;
+  try {
+    const channel = await botService.getBotChannels(botName);
+    res.status(200).json(channel);
+  } catch (error) {
+    console.error('Lỗi khi lấy bot:', error);
+    res.status(500).json({ message: 'Lỗi server khi lấy danh sách bot' });
+  }
+};

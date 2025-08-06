@@ -11,9 +11,11 @@ import LoginRegister from './page/LoginRegister';
 import Profile from './page/Profile';
 import Nav from './page/Nav';
 import Footer from './page/Footer';
+import AdminTransactions from './page/admin/AdminTransactions';
+import InvestmentOrdersPage from './page/admin/InvestmentOrdersPage';
 
 const bgStyle = {
-  backgroundImage: "url('/assets/images/bg-tech.jpg')",
+  backgroundImage: "url('/assets/images/background.jpg')",
   backgroundSize: 'cover',
   backgroundPosition: 'center',
   backgroundAttachment: 'fixed',
@@ -34,6 +36,8 @@ function App() {
             <Route path="/tham-gia" element={<JoinNow />} />
             <Route path="/login-register" element={<LoginRegister />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/admin/transactions" element={<AdminTransactions />} />
+            <Route path="/admin/investment" element={<InvestmentOrdersPage />} />
           </Routes>
         </main>
         <Footer /> {/*  Footer cho mọi trang (nếu cần) */}

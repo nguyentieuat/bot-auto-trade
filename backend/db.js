@@ -1,5 +1,5 @@
 // db.js
-const { Pool } = require('pg');
+const { Pool, Client } = require("pg");
 require('dotenv').config();
 
 // Khởi tạo kết nối PostgreSQL
@@ -11,18 +11,18 @@ const pool = new Pool({
     port: process.env.DB_PORT,         // mặc định PostgreSQL
 });
 
-// Test kết nối
-pool.connect((err, client, release) => {
-    if (err) {
-        return console.error('❌ Error acquiring client', err.stack);
-    }
-    client.query('SELECT NOW()', (err, result) => {
-        release();
-        if (err) {
-            return console.error('❌ Error executing query', err.stack);
-        }
-        console.log('✅ Connected to PostgreSQL at:', result.rows[0].now);
-    });
-});
+// // Test kết nối
+// pool.connect((err, client, release) => {
+//     if (err) {
+//         return console.error('❌ Error acquiring client', err.stack);
+//     }
+//     client.query('SELECT NOW()', (err, result) => {
+//         release();
+//         if (err) {
+//             return console.error('❌ Error executing query', err.stack);
+//         }
+//         console.log('✅ Connected to PostgreSQL at:', result.rows[0].now);
+//     });
+// });
 
 module.exports = pool;

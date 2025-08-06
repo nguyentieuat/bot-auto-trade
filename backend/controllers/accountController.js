@@ -2,6 +2,8 @@ const { User, UserProfile } = require('../models');
 const bcrypt = require('bcrypt');
 const pool = require('../db');
 
+const userService = require('../services/userService');
+
 exports.updateUserInfoByUsername = async (req, res) => {
     const { username } = req.params;
     const { bank, accountNumber, telegramID, address } = req.body;
@@ -80,82 +82,91 @@ exports.getUserProfileByUsername = async (req, res) => {
 };
 
 exports.createInvestment = async (req, res) => {
-  try {
-    const { username, capital, status } = req.body;
+    try {
+        const { username, capital, status } = req.body;
 
-    if (!username || !capital) {
-      return res.status(400).json({ message: "Thiếu dữ liệu đầu vào" });
+        if (!username || !capital) {
+            return res.status(400).json({ message: "Thiếu dữ liệu đầu vào" });
+        }
+
+        // 1. Tìm user_id và total_capital
+        const user = await userService.findUserByUsername(username);
+
+        if (!user) {
+            return res.status(404).json({ message: "Không tìm thấy người dùng" });
+        }
+
+        const { user_id, total_capital } = user;
+
+        if (total_capital === null) {
+            return res.status(400).json({ message: "Chưa có số vốn khả dụng" });
+        }
+
+        // 2. So sánh
+        if (parseFloat(capital) > parseFloat(total_capital)) {
+            return res.status(400).json({
+                message: `Số vốn không đủ. Số vốn còn lại: ${remainingCapital}`,
+            });
+        }
+
+        // 3. Tạo lệnh đầu tư
+        const newOrder = await userService.createInvestmentOrder(
+            user_id,
+            capital,
+            status
+        );
+
+        // 4. Trừ total_capital của user_profile
+        const remainingCapital = parseFloat(total_capital) - parseFloat(capital);
+        await userService.updateTotalCapital(user_id, remainingCapital);
+
+        res.status(201).json(newOrder);
+    } catch (error) {
+        console.error("Lỗi khi thêm đầu tư:", error);
+        res.status(500).json({ message: "Lỗi server" });
     }
-
-    // 1. Tìm user_id và total_capital
-    const userResult = await pool.query(
-      `SELECT u.id AS user_id, up.total_capital
-       FROM users u
-       LEFT JOIN user_profiles up ON u.id = up.user_id
-       WHERE u.username = $1`,
-      [username]
-    );
-
-    if (userResult.rowCount === 0) {
-      return res.status(404).json({ message: "Không tìm thấy người dùng" });
-    }
-
-    const { user_id, total_capital } = userResult.rows[0];
-
-    if (total_capital === null) {
-      return res.status(400).json({ message: "Chưa có số vốn khả dụng" });
-    }
-
-    // 2. Tính tổng vốn đã đặt ở trạng thái chưa hoàn tất
-    const activeOrders = await pool.query(
-      `SELECT COALESCE(SUM(capital_amount), 0) AS total_used
-       FROM investment_orders
-       WHERE user_id = $1 AND status IN ('pending', 'running')`,
-      [user_id]
-    );
-
-    const totalUsed = parseFloat(activeOrders.rows[0].total_used);
-    const remainingCapital = parseFloat(total_capital) - totalUsed;
-
-    // 3. So sánh
-    if (parseFloat(capital) > remainingCapital) {
-      return res.status(400).json({
-        message: `Số vốn không đủ. Số vốn còn lại: ${remainingCapital}`,
-      });
-    }
-
-    // 4. Tạo lệnh đầu tư
-    const result = await pool.query(
-      `INSERT INTO investment_orders (user_id, capital_amount, status, created_at)
-       VALUES ($1, $2, $3, NOW())
-       RETURNING *`,
-      [user_id, capital, status || 'pending']
-    );
-
-    res.status(201).json(result.rows[0]);
-  } catch (error) {
-    console.error("Lỗi khi thêm đầu tư:", error);
-    res.status(500).json({ message: "Lỗi server" });
-  }
 };
-
 
 exports.getInvestmentOrdersByUsername = async (req, res) => {
-  const { username } = req.params;
+    const { username } = req.params;
 
-  try {
-    const result = await pool.query(
-      `SELECT io.*
-       FROM investment_orders io
-       JOIN users u ON io.user_id = u.id
-       WHERE u.username = $1
-       ORDER BY io.created_at DESC`,
-      [username]
-    );
-
-    res.status(200).json(result.rows);
-  } catch (error) {
-    console.error('Lỗi khi lấy investment_orders:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+    try {
+        const orders = await userService.getInvestmentOrdersByUsername(username);
+        res.status(200).json(orders);
+    } catch (error) {
+        console.error('Lỗi khi lấy investment_orders:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 };
+
+
+exports.getSubscriptionByUsernameAndBotName = async (req, res) => {
+    const { username, botName } = req.params;
+
+    if (!username || !botName) {
+        return res.status(400).json({ message: "Thiếu dữ liệu đầu vào" });
+    }
+
+    try {
+        const subscription = await userService.getSubscriptionByUsernameAndBotName(username, botName);
+
+        if (!subscription) {
+            return res.status(403).json({ message: "Bạn chưa đăng ký hoặc gói đã hết hạn" });
+        }
+
+        res.status(200).json(subscription);
+    } catch (error) {
+        console.error('Lỗi khi lấy subscription:', error);
+
+        if (error.message === 'UserNotFound') {
+            return res.status(404).json({ message: "Không tìm thấy người dùng" });
+        }
+
+        if (error.message === 'BotNotFound') {
+            return res.status(404).json({ message: "Không tìm thấy bot" });
+        }
+
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+

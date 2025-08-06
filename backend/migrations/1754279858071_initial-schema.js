@@ -25,13 +25,13 @@ exports.up = (pgm) => {
     bank: { type: 'varchar(100)' },
     bank_account: { type: 'varchar(100)' },
     telegram_id: { type: 'varchar(50)' },
-    total_capital: { type: 'numeric(26, 3)'}
+    total_capital: { type: 'numeric(26, 3)' }
   });
 
   pgm.createTable('bots', {
     id: 'id',
-    name: { type: 'varchar(100)', notNull: true },
-    name_display: { type: 'varchar(100)', notNull: true },
+    name: { type: 'varchar(100)', notNull: true, unique: true },
+    name_display: { type: 'varchar(100)', notNull: true, unique: true },
     description: { type: 'text' },
     status: { type: 'varchar(20)', default: 'active' },
     risk_level: { type: 'int', default: 1, check: 'risk_level >= 1 AND risk_level <= 5' },
@@ -41,8 +41,9 @@ exports.up = (pgm) => {
   pgm.createTable('bot_channels', {
     id: 'id',
     bot_id: { type: 'int', notNull: true, references: 'bots', onDelete: 'cascade' },
-    channel_link: { type: 'varchar(255)', notNull: true },
-    is_premium: { type: 'boolean', default: false }, // false = free, true = premium
+    channel_link_free: { type: 'varchar(255)' },
+    channel_link_pre: { type: 'varchar(255)' },
+    status: { type: 'varchar(20)', default: 'active' },
     note: { type: 'text' }, // Ghi chú (nếu cần)
   });
   pgm.addConstraint('bot_channels', 'unique_bot_channel_type', 'UNIQUE(bot_id, is_premium)');
@@ -107,19 +108,30 @@ exports.up = (pgm) => {
   });
 
   pgm.createTable('deposit_requests', {
-  id: 'id',
-  user_id: { type: 'int', notNull: true, references: 'users', onDelete: 'cascade' },
-  amount: { type: 'numeric(22, 2)', notNull: true },
-  requested_at: { type: 'timestamp', notNull: true, default: pgm.func('now()') },
-  confirmed_at: { type: 'timestamp' },
-  status: { type: 'varchar(20)', default: 'pending' },  // 'pending', 'confirmed', 'failed'
-  method: { type: 'varchar(50)', default: 'bank_transfer'}, // 'bank_transfer', 'usdt', 'momo', etc.
-  transaction_id: { type: 'varchar(255)' }, // optional TXID nếu có
-  note: { type: 'text' },
-});
+    id: 'id',
+    user_id: { type: 'int', notNull: true, references: 'users', onDelete: 'cascade' },
+    amount: { type: 'numeric(22, 2)', notNull: true },
+    requested_at: { type: 'timestamp', notNull: true, default: pgm.func('now()') },
+    confirmed_at: { type: 'timestamp' },
+    status: { type: 'varchar(20)', default: 'pending' },  // 'pending', 'confirmed', 'failed'
+    method: { type: 'varchar(50)', default: 'bank_transfer' }, // 'bank_transfer', 'usdt', 'momo', etc.
+    transaction_id: { type: 'varchar(255)' }, // optional TXID nếu có
+    note: { type: 'text' },
+  });
+
+  pgm.createTable('system_bank_account', {
+    id: 'id',
+    bank_name: { type: 'text', notNull: true },
+    account_number: { type: 'text', notNull: true },
+    account_holder: { type: 'text', notNull: true },
+    qr_code: { type: 'text', notNull: false },
+    is_active: { type: 'boolean', notNull: true, default: true },
+  });
+
 };
 
 exports.down = (pgm) => {
+  pgm.dropTable('system_bank_account');
   pgm.dropTable('deposit_requests');
   pgm.dropTable('withdrawal_requests');
   pgm.dropTable('user_subscriptions');

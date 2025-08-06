@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import BotGainChart from './bot_chart/BotGainChart';
 import AccountManagement from './account/AccountManagement';
 import DashboardInvestSection from './account/DashboardInvestSection';
+import Deposit from './payment/Deposit';
+import Withdraw from './payment/Withdraw';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -40,7 +42,7 @@ const Profile = () => {
 
     setUser({
       ...parsedUser,
-      capital: 100_000_000, 
+      capital: 100_000_000,
       profit: '25,000,000 VND',
       bots,
       investmentHistory: mockInvestmentHistory,
@@ -73,7 +75,16 @@ const Profile = () => {
               Thông Tin Cá Nhân
             </button>
           </li>
-          {/* Thêm các tab khác tương tự */}
+          <li className="nav-item mb-2">
+            <button className={`btn w-100 text-start ${activeTab === 'deposit' ? 'btn-light text-dark' : 'btn-primary'}`} onClick={() => setActiveTab('deposit')}>
+              Nạp tiền
+            </button>
+          </li>
+          <li className="nav-item mb-2">
+            <button className={`btn w-100 text-start ${activeTab === 'withdraw' ? 'btn-light text-dark' : 'btn-primary'}`} onClick={() => setActiveTab('withdraw')}>
+              Rút tiền
+            </button>
+          </li>
         </ul>
       </div>
 
@@ -108,6 +119,16 @@ const Profile = () => {
             // Thêm cập nhật thực tế nếu cần
           }}
         />}
+
+        {activeTab === 'deposit' && (
+          <Deposit user={user} />
+        )}
+
+
+        {activeTab === 'withdraw' && (
+          <Withdraw user={user} />
+        )}
+
 
       </div>
     </div>

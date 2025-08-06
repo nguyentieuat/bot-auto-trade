@@ -28,7 +28,7 @@ function Home() {
   }, [viewMode]);
 
   // Fetch 1 page dữ liệu từ server
-  const fetchBotsPage = async (pageIndex) => {
+    const fetchBotsPage = async (pageIndex) => {
     try {
       setLoading(true);
       const res = await axios.get(`${backendUrl}/api/fbt-data`, {
@@ -51,13 +51,11 @@ function Home() {
       setHasMore(res.data.hasMore);
       setPage((prev) => prev + 1);
 
-      // Lưu cache nếu là lần đầu (trang 0)
-      if (pageIndex === 0) {
-        localStorage.setItem(CACHE_KEY, JSON.stringify({
-          timestamp: Date.now(),
-          data: updated,
-        }));
-      }
+      // ✅ Cập nhật cache mỗi lần có dữ liệu mới
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        timestamp: Date.now(),
+        data: updated,
+      }));
 
     } catch (err) {
       console.error(err);
