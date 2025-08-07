@@ -12,7 +12,7 @@ const Deposit = ({ user }) => {
     const [reloadTrigger, setReloadTrigger] = useState(0);
 
     const token = localStorage.getItem("token");
-
+    
     useEffect(() => {
         axios.get(`${backendUrl}/api/wallet/system-bank-info`, {
             headers: {

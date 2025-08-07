@@ -13,6 +13,7 @@ import Nav from './page/Nav';
 import Footer from './page/Footer';
 import AdminTransactions from './page/admin/AdminTransactions';
 import InvestmentOrdersPage from './page/admin/InvestmentOrdersPage';
+import AdminDashboard from './page/admin/AdminDashboard';
 const backendUrl = process.env.REACT_APP_API_URL;
 
 const bgStyle = {
@@ -63,6 +64,7 @@ function App() {
         <Nav />   {/*  HIỂN THỊ NAV Ở MỌI TRANG */}
         <main style={{ paddingTop: '75px' }}> {/* để tránh bị đè bởi Nav fixed-top */}
           <Routes>
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/*" element={<Home />} />
             <Route path="/bots/:name" element={<Home />} />
             <Route path="/tham-gia" element={<JoinNow />} />

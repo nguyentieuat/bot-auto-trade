@@ -14,7 +14,6 @@ const InvestmentOrdersPage = () => {
     const token = localStorage.getItem('token');
 
     const fetchOrders = async () => {
-        debugger
         try {
             const res = await axios.get(`${backendUrl}/api/admin/investment-orders`, {
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },

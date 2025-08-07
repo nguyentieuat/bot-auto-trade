@@ -188,7 +188,6 @@ router.get('/api/admin/investment-orders', authenticateTokenAdmin, async (req, r
     }
 });
 
-
 router.post('/api/admin/investment-orders/:id', authenticateTokenAdmin, async (req, res) => {
     debugger
     const { id } = req.params;
@@ -245,6 +244,38 @@ router.post('/api/admin/investment-orders/:id', authenticateTokenAdmin, async (r
     } catch (err) {
         console.error('Action failed:', err);
         res.status(500).json({ message: 'Server error' });
+    }
+});
+
+router.get('/api/admin/guest-join-requests', authenticateTokenAdmin, async (req, res) => {
+    try {
+        // Lấy toàn bộ requests
+        const result = await pool.query(`
+      SELECT * FROM guest_join_requests
+      ORDER BY submitted_at DESC
+    `);
+
+        const requests = result.rows;
+
+        // Lấy toàn bộ bots (id và name_display)
+        const botResult = await pool.query(`SELECT id, name_display FROM bots`);
+        const botMap = {};
+        botResult.rows.forEach(bot => {
+            botMap[bot.id] = bot.name_display;
+        });
+
+        // Gắn tên bot vào từng request
+        const enrichedRequests = requests.map((r) => ({
+            ...r,
+            selected_bot_names: Array.isArray(r.selected_bot_ids)
+                ? r.selected_bot_ids.map(id => botMap[id] || `Bot #${id}`)
+                : [],
+        }));
+
+        res.json(enrichedRequests);
+    } catch (err) {
+        console.error('Lỗi khi lấy guest_join_requests:', err);
+        res.status(500).json({ message: 'Lỗi server' });
     }
 });
 

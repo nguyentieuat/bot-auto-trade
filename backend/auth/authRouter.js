@@ -48,7 +48,7 @@ router.post('/api/login', async (req, res) => {
 
         // Tạo JWT
         const token = jwt.sign(
-            { id: user.id, username: user.username },
+            { id: user.id, username: user.username, is_admin: user.is_admin },
             SECRET_KEY,
             { expiresIn: '1d' }
         );
