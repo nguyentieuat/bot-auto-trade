@@ -1,90 +1,87 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BotGainChart from './bot_chart/BotGainChart';
+import GainChart from './bot_chart/GainChart';
 import AccountManagement from './account/AccountManagement';
 import DashboardInvestSection from './account/DashboardInvestSection';
 import Deposit from './payment/Deposit';
 import Withdraw from './payment/Withdraw';
 
+const backendUrl = process.env.REACT_APP_API_URL;
+
 const Profile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [user, setUser] = useState(null);
+  const [userBotSubcribedGains, setUserBotSubcribedGains] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user'));
+
+  const fetchUserBotSubcribedGains = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const res = await fetch(`${backendUrl}/api/users/${user.username}/subscribed-bots/gains`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Lỗi API: ${res.status}`);
+      }
+
+      const data = await res.json();
+      setUserBotSubcribedGains(data);
+    } catch (err) {
+      console.error("Lỗi khi fetch gains:", err);
+      setError("Không thể tải dữ liệu lãi/lỗ. Vui lòng thử lại sau.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const localUser = localStorage.getItem('user');
-    if (!localUser) {
-      navigate('/login-register');
-      return;
+    if (user?.username) {
+      fetchUserBotSubcribedGains();
     }
+  }, [user?.username]);
 
-    const parsedUser = JSON.parse(localUser);
-
-    const mockChartData = [
-      { date: '2025-07-01', gain: 100000, total_gain: 100000 },
-      { date: '2025-07-02', gain: -20000, total_gain: 80000 },
-      { date: '2025-07-03', gain: 50000, total_gain: 130000 },
-      { date: '2025-07-04', gain: 0, total_gain: 130000 },
-      { date: '2025-07-05', gain: -30000, total_gain: 100000 },
-    ];
-
-    const bots = ['Bot A', 'Bot B', 'Bot C', 'Bot D', 'Bot E'].map((name, i) => ({
-      name,
-      data: mockChartData,
-      capital: 10_000_000 + i * 5_000_000, // số thực để biểu đồ xử lý
-    }));
-
-    const mockInvestmentHistory = [
-      { botName: 'Bot A', amount: 10_000_000, startDate: '2025-07-01', status: 'Đang chạy' },
-      { botName: 'Bot B', amount: 15_000_000, startDate: '2025-07-02', status: 'Đang chạy' },
-      { botName: 'Bot C', amount: 20_000_000, startDate: '2025-07-03', status: 'Tạm dừng' },
-    ];
-
-    setUser({
-      ...parsedUser,
-      capital: 100_000_000,
-      profit: '25,000,000 VND',
-      bots,
-      investmentHistory: mockInvestmentHistory,
-    });
-  }, [navigate]);
-
-  if (!user) return <div className="text-center text-light">Đang tải thông tin...</div>;
+  if (!user) {
+    return (
+      <div className="text-center text-light py-5">
+        <div className="spinner-border text-light" role="status"></div>
+        <p className="mt-3">Đang tải thông tin người dùng...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="d-flex bg-light text-dark min-vh-100">
       {/* Sidebar */}
       <div className="bg-primary p-4" style={{ width: '260px' }}>
         <div className="text-center mb-4">
-          {/* <img src="/path-to-avatar.png" alt="Avatar" className="rounded-circle mb-2" width="80" /> */}
           <h5>{user.username}</h5>
         </div>
         <ul className="nav flex-column">
-          <li className="nav-item mb-2">
-            <button className={`btn w-100 text-start ${activeTab === 'dashboard' ? 'btn-light text-dark' : 'btn-primary'}`} onClick={() => setActiveTab('dashboard')}>
-              Dashboard
-            </button>
-          </li>
-          <li className="nav-item mb-2">
-            <button className={`btn w-100 text-start ${activeTab === 'account' ? 'btn-light text-dark' : 'btn-primary'}`} onClick={() => setActiveTab('account')}>
-              Quản Lý Tài Khoản
-            </button>
-          </li>
-          <li className="nav-item mb-2">
-            <button className={`btn w-100 text-start ${activeTab === 'personal' ? 'btn-light text-dark' : 'btn-primary'}`} onClick={() => setActiveTab('personal')}>
-              Thông Tin Cá Nhân
-            </button>
-          </li>
-          <li className="nav-item mb-2">
-            <button className={`btn w-100 text-start ${activeTab === 'deposit' ? 'btn-light text-dark' : 'btn-primary'}`} onClick={() => setActiveTab('deposit')}>
-              Nạp tiền
-            </button>
-          </li>
-          <li className="nav-item mb-2">
-            <button className={`btn w-100 text-start ${activeTab === 'withdraw' ? 'btn-light text-dark' : 'btn-primary'}`} onClick={() => setActiveTab('withdraw')}>
-              Rút tiền
-            </button>
-          </li>
+          {[
+            { key: 'dashboard', label: 'Dashboard' },
+            { key: 'account', label: 'Quản Lý Tài Khoản' },
+            { key: 'personal', label: 'Thông Tin Cá Nhân' },
+            { key: 'deposit', label: 'Nạp tiền' },
+            { key: 'withdraw', label: 'Rút tiền' }
+          ].map(tab => (
+            <li key={tab.key} className="nav-item mb-2">
+              <button
+                className={`btn w-100 text-start ${activeTab === tab.key ? 'btn-light text-dark' : 'btn-primary'}`}
+                onClick={() => setActiveTab(tab.key)}
+              >
+                {tab.label}
+              </button>
+            </li>
+          ))}
         </ul>
       </div>
 
@@ -93,43 +90,38 @@ const Profile = () => {
         {activeTab === 'dashboard' && (
           <div>
             <h2 className="mb-4">Dashboard Tổng Quan</h2>
-
             <h4 className="text-info mb-3">Biểu đồ tổng lãi/lỗ</h4>
-            <BotGainChart data={user.bots[0].data} />
 
-            <hr className="my-4" />
-
-            {user.bots.map((bot, index) => (
-              <div key={index} className="mb-5">
-                <h5 className="text-warning">{bot.name}</h5>
-                <BotGainChart data={bot.data} />
+            {loading ? (
+              <div className="d-flex align-items-center text-muted">
+                <div className="spinner-border spinner-border-sm me-2" role="status" />
+                Đang tải dữ liệu...
               </div>
-            ))}
+            ) : error ? (
+              <div className="alert alert-danger">{error}</div>
+            ) : userBotSubcribedGains?.length > 0 ? (
+              userBotSubcribedGains.map((bot, index) => (
+                <div key={index} className="mb-5">
+                  <h5 className="text-warning">{bot.name}</h5>
+                  <GainChart data={bot.daily_stats} mode={
+                    bot.daily_stats.length >= 1000
+                      ? 'year'
+                      : bot.daily_stats.length >= 100
+                        ? 'month'
+                        : 'day'
+                  } />
+                </div>
+              ))
+            ) : (
+              <p className="text-muted">Chưa có bot nào được đăng ký theo dõi.</p>
+            )}
           </div>
         )}
 
         {activeTab === 'personal' && <AccountManagement user={user} />}
-
-        {activeTab === 'account' && <DashboardInvestSection
-          user={user}
-          totalCapital={user.capital}
-          investmentHistory={user.investmentHistory}
-          onInvest={(data) => {
-            alert(`Đã đặt lệnh: ${data.botName} - ${data.amount.toLocaleString()} đ`);
-            // Thêm cập nhật thực tế nếu cần
-          }}
-        />}
-
-        {activeTab === 'deposit' && (
-          <Deposit user={user} />
-        )}
-
-
-        {activeTab === 'withdraw' && (
-          <Withdraw user={user} />
-        )}
-
-
+        {activeTab === 'account' && <DashboardInvestSection user={user} />}
+        {activeTab === 'deposit' && <Deposit user={user} />}
+        {activeTab === 'withdraw' && <Withdraw user={user} />}
       </div>
     </div>
   );

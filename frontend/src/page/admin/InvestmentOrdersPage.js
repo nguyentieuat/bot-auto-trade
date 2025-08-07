@@ -1,20 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+
 const backendUrl = process.env.REACT_APP_API_URL;
 
 const InvestmentOrdersPage = () => {
     const [orders, setOrders] = useState([]);
     const [usernameFilter, setUsernameFilter] = useState('');
-    const [statusFilter, setStatusFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('pending');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [loadingOrderId, setLoadingOrderId] = useState(null); // NEW
 
     const token = localStorage.getItem('token');
 
     const fetchOrders = async () => {
+        debugger
         try {
             const res = await axios.get(`${backendUrl}/api/admin/investment-orders`, {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 params: {
                     page,
                     username: usernameFilter,
@@ -40,15 +43,18 @@ const InvestmentOrdersPage = () => {
 
     const handleAction = async (id, action) => {
         try {
-            await axios.post(`${backendUrl}/api/admin/investment-orders/${id}/action`, 
+            setLoadingOrderId(id); // NEW: show loading indicator
+            await axios.post(`${backendUrl}/api/admin/investment-orders/${id}`, 
                 { action }, 
                 {
                     headers: { Authorization: `Bearer ${token}` }
                 }
             );
-            fetchOrders(); // Refresh data
+            await fetchOrders(); // Refresh data
         } catch (error) {
             console.error(`Lỗi khi thực hiện hành động ${action}:`, error);
+        } finally {
+            setLoadingOrderId(null); // Reset loading
         }
     };
 
@@ -80,8 +86,7 @@ const InvestmentOrdersPage = () => {
                         <option value="pending">Pending</option>
                         <option value="confirmed">Confirmed</option>
                         <option value="rejected">Rejected</option>
-                        <option value="success">Success</option>
-                        <option value="failed">Failed</option>
+                        <option value="starting">Starting</option>
                     </select>
                 </div>
 
@@ -117,14 +122,16 @@ const InvestmentOrdersPage = () => {
                                             <button
                                                 className="btn btn-success btn-sm me-2"
                                                 onClick={() => handleAction(order.id, 'confirm')}
+                                                disabled={loadingOrderId === order.id}
                                             >
-                                                Confirm
+                                                {loadingOrderId === order.id ? 'Processing...' : 'Confirm'}
                                             </button>
                                             <button
                                                 className="btn btn-danger btn-sm"
                                                 onClick={() => handleAction(order.id, 'reject')}
+                                                disabled={loadingOrderId === order.id}
                                             >
-                                                Reject
+                                                {loadingOrderId === order.id ? 'Processing...' : 'Reject'}
                                             </button>
                                         </>
                                     )}
@@ -134,14 +141,16 @@ const InvestmentOrdersPage = () => {
                                             <button
                                                 className="btn btn-warning btn-sm me-2"
                                                 onClick={() => handleAction(order.id, 'start')}
+                                                disabled={loadingOrderId === order.id}
                                             >
-                                                Start
+                                                {loadingOrderId === order.id ? 'Starting...' : 'Start'}
                                             </button>
                                             <button
                                                 className="btn btn-danger btn-sm"
                                                 onClick={() => handleAction(order.id, 'reject')}
+                                                disabled={loadingOrderId === order.id}
                                             >
-                                                Reject
+                                                {loadingOrderId === order.id ? 'Processing...' : 'Reject'}
                                             </button>
                                         </>
                                     )}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './page/Home';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -13,6 +13,7 @@ import Nav from './page/Nav';
 import Footer from './page/Footer';
 import AdminTransactions from './page/admin/AdminTransactions';
 import InvestmentOrdersPage from './page/admin/InvestmentOrdersPage';
+const backendUrl = process.env.REACT_APP_API_URL;
 
 const bgStyle = {
   backgroundImage: "url('/assets/images/background.jpg')",
@@ -25,6 +26,37 @@ const bgStyle = {
 };
 
 function App() {
+  useEffect(() => {
+    const checkUserSession = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return; // không có token thì thôi
+
+      try {
+        const res = await fetch(`${backendUrl}/api/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          // Token hết hạn, hoặc user không tồn tại
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          // Có thể điều hướng về trang login nếu cần
+        } else {
+          const user = await res.json();
+          localStorage.setItem('user', JSON.stringify(user));
+        }
+      } catch (err) {
+        console.error('Lỗi khi kiểm tra user:', err);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+    };
+
+    checkUserSession();
+  }, []);
+
   return (
     <div className="App" style={bgStyle}>
       <Router>

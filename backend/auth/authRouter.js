@@ -54,7 +54,7 @@ router.post('/api/login', async (req, res) => {
         );
 
         delete user.password;
-        res.json({ token, user});
+        res.json({ token, user });
     } catch (err) {
         res.status(500).json({ message: 'Lỗi server' });
     }
@@ -67,5 +67,18 @@ router.get('/api/profile', authenticateToken, async (req, res) => {
     const result = await pool.query('SELECT * FROM users WHERE id=$1', [userId]);
     res.json({ user: result.rows[0] });
 });
+
+router.get('/api/auth/me', authenticateToken, async (req, res) => {
+    try {
+        // req.user được gán từ middleware sau khi verify token
+        const { id, email, username } = req.user;
+        res.json({ id, email, username });
+    } catch (err) {
+        console.error('Error in /me:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+
 
 module.exports = router;

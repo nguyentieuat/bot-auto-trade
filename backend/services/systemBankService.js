@@ -70,7 +70,7 @@ exports.withdrawBankUser = async (username, amount) => {
         await client.query('BEGIN');
 
         // Lấy user_id
-        const user = await userService.findUserByUsername(username);
+        const user = await userService.getTotalCaptitalByUsername(username);
         if (!user) {
             throw new Error('Không tìm thấy người dùng');
         }

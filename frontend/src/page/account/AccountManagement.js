@@ -3,6 +3,7 @@ const backendUrl = process.env.REACT_APP_API_URL;
 
 const AccountManagement = ({ user }) => {
     const [userProfile, setUserProfile] = useState(null);
+    const [userInfo, setUserInfo] = useState(null)
     const [isEditingInfo, setIsEditingInfo] = useState(false);
     const [isEditingPassword, setIsEditingPassword] = useState(false);
 
@@ -27,25 +28,36 @@ const AccountManagement = ({ user }) => {
     }, [userProfile]);
 
     useEffect(() => {
-        if (user) {
-            const fetchuserProfile = async () => {
-                try {
-                    const res = await fetch(`${backendUrl}/api/users/${user.username}/info`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    });
+        if (!user) return;
 
-                    if (!res.ok) throw new Error("Không thể tải thông tin người dùng.");
+        const fetchUserInfo = async () => {
+            try {
+                const res = await fetch(`${backendUrl}/api/users/${user.username}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error("Không thể tải thông tin người dùng.");
+                const data = await res.json();
+                setUserInfo(data);
+            } catch (err) {
+                console.error("Lỗi fetchUserInfo:", err);
+            }
+        };
 
-                    const data = await res.json();
-                    setUserProfile(data);
-                } catch (err) {
-                    console.error(err);
-                }
-            };
-            fetchuserProfile();
-        }
+        const fetchUserProfile = async () => {
+            try {
+                const res = await fetch(`${backendUrl}/api/users/${user.username}/info`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error("Không thể tải profile người dùng.");
+                const data = await res.json();
+                setUserProfile(data);
+            } catch (err) {
+                console.error("Lỗi fetchUserProfile:", err);
+            }
+        };
+
+        fetchUserInfo();
+        fetchUserProfile();
     }, [user]);
 
     const handleSaveInfo = async () => {
@@ -122,15 +134,15 @@ const AccountManagement = ({ user }) => {
                     <div className="col-md-6">
                         <div className="mb-3">
                             <label className="form-label fw-bold text-start w-100">Tên Đăng Nhập</label>
-                            <input type="text" className="form-control" value={user.username} disabled />
+                            <input type="text" className="form-control" value={userInfo?.username} disabled />
                         </div>
 
                         <div className="mb-3">
                             <label className="form-label fw-bold text-start w-100">Email</label>
                             <input type="email" className="form-control" value={
-                                user.email
+                                userInfo?.email
                                     ? (() => {
-                                        const [name, domain] = user.email.split("@");
+                                        const [name, domain] = userInfo.email.split("@");
                                         const maskedName = name.length > 2
                                             ? `${name[0]}***${name[name.length - 1]}`
                                             : `${name[0]}*`;
@@ -145,7 +157,7 @@ const AccountManagement = ({ user }) => {
 
                         <div className="mb-3">
                             <label className="form-label fw-bold text-start w-100">Số Điện Thoại</label>
-                            <input type="text" className="form-control" value={user.phone ? user.phone.replace(/.(?=.{4})/g, "*") : ""} disabled />
+                            <input type="text" className="form-control" value={userInfo?.phone ? userInfo.phone.replace(/.(?=.{4})/g, "*") : ""} disabled />
                         </div>
 
 

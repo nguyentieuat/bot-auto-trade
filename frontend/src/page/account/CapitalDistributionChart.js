@@ -2,20 +2,12 @@ import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recha
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#8dd1e1', '#a4de6c', '#d0ed57', '#999'];
 
-const CapitalDistributionChart = ({ bots, totalCapital }) => {
-  const botData = bots
-    .filter(bot => bot.capital > 0)
-    .map(bot => ({
-      name: bot.name,
-      value: bot.capital || 0
-    }));
-
-  const totalDistributed = botData.reduce((sum, item) => sum + item.value, 0);
-  const remainingCapital = Math.max(totalCapital - totalDistributed, 0);
-
+const CapitalDistributionChart = ({ investmentSummary }) => {
   const data = [
-    ...botData,
-    { name: 'Vốn còn lại', value: remainingCapital }
+    { name: 'Vốn đang chờ', value: parseFloat(investmentSummary.total_pending) / 1000 },
+    { name: 'Vốn đã xác nhận', value: parseFloat(investmentSummary.total_confirmed) / 1000 },
+    { name: 'Vốn đang chạy', value: parseFloat(investmentSummary.total_starting) / 1000 },
+    { name: 'Vốn còn lại', value: parseFloat(investmentSummary.remaining_capital) / 1000 },
   ];
 
   if (data.every(item => item.value === 0)) {

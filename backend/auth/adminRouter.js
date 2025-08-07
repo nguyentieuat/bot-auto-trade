@@ -166,13 +166,13 @@ router.get('/api/admin/investment-orders', authenticateTokenAdmin, async (req, r
         params.push(limit, offset); // $n+1, $n+2
         const dataRes = await pool.query(
             `
-      SELECT io.*, u.username
-      FROM investment_orders io
-      JOIN users u ON u.id = io.user_id
-      ${whereClause}
-      ORDER BY io.created_at DESC
-      LIMIT $${params.length - 1} OFFSET $${params.length}
-      `,
+            SELECT io.*, u.username
+            FROM investment_orders io
+            JOIN users u ON u.id = io.user_id
+            ${whereClause}
+            ORDER BY io.created_at DESC
+            LIMIT $${params.length - 1} OFFSET $${params.length}
+            `,
             params
         );
 
@@ -189,7 +189,8 @@ router.get('/api/admin/investment-orders', authenticateTokenAdmin, async (req, r
 });
 
 
-router.post('/api/admin/investment-orders/:id/action', authenticateTokenAdmin, async (req, res) => {
+router.post('/api/admin/investment-orders/:id', authenticateTokenAdmin, async (req, res) => {
+    debugger
     const { id } = req.params;
     const { action } = req.body;
 
@@ -216,7 +217,19 @@ router.post('/api/admin/investment-orders/:id/action', authenticateTokenAdmin, a
                 `;
                 break;
             case 'start':
-                query = `UPDATE investment_orders SET start_at = NOW() WHERE id = $1 AND status = 'confirmed'`;
+                query = `WITH updated_order AS (
+                            UPDATE investment_orders
+                            SET 
+                                start_at = NOW(),
+                                status = 'starting'
+                            WHERE id = $1 AND status = 'confirmed' AND start_at IS NULL
+                            RETURNING capital_amount
+                            )
+                            UPDATE system_total_capital
+                            SET 
+                            current_amount = current_amount + updated_order.capital_amount,
+                            updated_at = NOW()
+                            FROM updated_order`;
                 break;
             default:
                 return res.status(400).json({ message: 'Invalid action' });

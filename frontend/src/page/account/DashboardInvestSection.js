@@ -2,117 +2,121 @@ import React, { useEffect, useState } from "react";
 import CapitalDistributionChart from "./CapitalDistributionChart";
 import DashboardInvestForm from "./DashboardInvestForm";
 import BotInvestmentHistoryTable from "./BotInvestmentHistoryTable";
+import GainChart from "../bot_chart/GainChart";
+
 const backendUrl = process.env.REACT_APP_API_URL;
 
 const DashboardInvestSection = ({ user }) => {
-  const [botData, setBotData] = useState([]);
-  const [investmentHistory, setInvestmentHistory] = useState([]);
-
+  const [investmentSummary, setInvestmentSummary] = useState([]);
+  const [userProfits, setUserProfits] = useState([]);
   const [investments, setInvestments] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  const username = user.username;
+  const [loading, setLoading] = useState(true); // Tổng loading
+  const [error, setError] = useState(null);
+
+  const username = user?.username;
   const token = localStorage.getItem('token');
 
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
 
-
-  const fetchInvestments = async () => {
     try {
-      const res = await fetch(`${backendUrl}/api/investment-orders/${username}`, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        }
-      });
+      const [resInvestments, resSummary, resProfits] = await Promise.all([
+        fetch(`${backendUrl}/api/investment-orders/${username}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        fetch(`${backendUrl}/api/investment-summary/${username}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        fetch(`${backendUrl}/api/user-profits/${username}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+      ]);
 
-      if (!res.ok) {
-        throw new Error("Lỗi khi gọi API: " + res.status);
+      if (!resInvestments.ok || !resSummary.ok || !resProfits.ok) {
+        throw new Error("Có lỗi xảy ra khi tải dữ liệu");
       }
 
-      const data = await res.json();
-      setInvestments(data);
+      const investmentsData = await resInvestments.json();
+      const summaryData = await resSummary.json();
+      const profitsData = await resProfits.json();
+
+      setInvestments(investmentsData);
+      setInvestmentSummary(summaryData);
+      setUserProfits(profitsData.data || []);
     } catch (err) {
       console.error("Lỗi khi fetch dữ liệu:", err);
+      setError("Không thể tải dữ liệu. Vui lòng thử lại sau.");
     } finally {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     if (!username) return;
-    fetchInvestments();
+    fetchData();
   }, [username]);
 
-  const mockBots = [
-    { id: 1, name: "Bot Alpha", capital: 500 },
-    { id: 2, name: "Bot Beta", capital: 300 },
-    { id: 3, name: "Bot Gamma", capital: 200 }
-  ];
+  if (loading) {
+    return (
+      <div className="text-center my-5">
+        <div className="spinner-border text-primary" role="status"></div>
+        <p className="mt-3 text-muted">Đang tải dữ liệu đầu tư...</p>
+      </div>
+    );
+  }
 
-  const mockHistory = [
-    {
-      id: 1,
-      botName: "Bot Alpha",
-      amount: 200,
-      status: "Running",
-      investedAt: "2025-07-10"
-    },
-    {
-      id: 2,
-      botName: "Bot Beta",
-      amount: 300,
-      status: "Pending",
-      investedAt: "2025-07-15"
-    },
-    {
-      id: 3,
-      botName: "Bot Gamma",
-      amount: 100,
-      status: "Completed",
-      investedAt: "2025-07-20"
-    }
-  ];
-
-  useEffect(() => {
-    setBotData(mockBots);
-    setInvestmentHistory(mockHistory);
-  }, []);
+  if (error) {
+    return (
+      <div className="alert alert-danger mt-4" role="alert">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <div className="container mt-4">
-      <h4 className="mb-3 text-primary text-start w-100">Phân Bổ Vốn Theo Bot</h4>
+      <h4 className="mb-3 text-primary text-start w-100">Phân Bổ Vốn Theo Trạng Thái</h4>
 
       <div className="row">
         {/* Chart - 60% width */}
         <div className="col-md-7">
-          <CapitalDistributionChart bots={botData} />
+          <CapitalDistributionChart investmentSummary={investmentSummary} />
           <p className="text-muted mt-2">Đơn vị: x1000đ</p>
         </div>
 
         {/* Form - 40% width */}
         <div className="col-md-5">
           <DashboardInvestForm
-            bots={botData}
             username={user.username}
             onSuccess={(newData) => {
-              setInvestmentHistory(prev => [newData, ...prev]);
-              fetchInvestments()
+              setInvestments((prev) => [newData, ...prev]);
+              fetchData(); // refresh lại dữ liệu khi thêm mới
             }}
           />
         </div>
       </div>
 
+      <div className="row mt-5">
+        <h4 className="text-info mb-3">Biểu đồ tăng trưởng</h4>
+        <GainChart data={userProfits} mode={
+          userProfits.length >= 1000
+            ? 'year'
+            : userProfits.length >= 100
+              ? 'month'
+              : 'day'
+        } />
+      </div>
+
       <h5 className="text-primary mt-5 text-start w-100">Lịch Sử Đầu Tư</h5>
-      {loading ? (
-        <div className="d-flex align-items-center text-muted">
-          <div className="spinner-border spinner-border-sm me-2" role="status"></div>
-          Đang tải dữ liệu đầu tư...
-        </div>
-      ) : (
+      {investments.length > 0 ? (
         <BotInvestmentHistoryTable investments={investments} />
+      ) : (
+        <p className="text-muted">Không có lịch sử đầu tư.</p>
       )}
     </div>
   );
-
 };
 
 export default DashboardInvestSection;

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import navItems from './data/navData';
 import { Link, useLocation } from 'react-router-dom';
+const backendUrl = process.env.REACT_APP_API_URL;
 
 const Nav = () => {
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')));

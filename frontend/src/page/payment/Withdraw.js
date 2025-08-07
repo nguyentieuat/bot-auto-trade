@@ -16,8 +16,9 @@ const Withdraw = ({ user }) => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.post(`${backendUrl}/api/withdraw/${user.username}`, { amount }, {
+            const res = await axios.post(`${backendUrl}/api/withdraw/${user.username}`, { amount: parseFloat(amount) }, {
                 headers: {
+                    'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 }
             });

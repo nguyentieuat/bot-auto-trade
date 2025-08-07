@@ -1,9 +1,8 @@
 const { readAllCSVFiles } = require('../services/fbtService');
-const { Pool } = require('pg');
 const path = require('path');
+const cron = require('node-cron');
+const pool = require('../db');
 const {truncateDecimal} = require('../utils/utils');
-
-const pool = new Pool(); // lấy config DB từ .env
 
 function getBotIdFromFilename(filename) {
   const name = path.basename(filename, '.csv');
@@ -50,3 +49,7 @@ async function updateDailyBotStats() {
   }
 }
 
+cron.schedule('0 0 * * *', async () => {
+  console.log('⏰ Running daily update bot stats...');
+  await updateDailyBotStats();
+});

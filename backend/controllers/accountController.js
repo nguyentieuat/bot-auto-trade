@@ -7,7 +7,9 @@ const userService = require('../services/userService');
 exports.updateUserInfoByUsername = async (req, res) => {
     const { username } = req.params;
     const { bank, accountNumber, telegramID, address } = req.body;
-    debugger
+    if (!username) {
+        return res.status(400).json({ message: "Thiếu dữ liệu đầu vào" });
+    }
     try {
         const user = await User.findOne({
             where: { username },
@@ -44,7 +46,9 @@ exports.updateUserInfoByUsername = async (req, res) => {
 exports.changePasswordByUsername = async (req, res) => {
     const { username } = req.params;
     const { oldPassword, newPassword } = req.body;
-
+    if (!username) {
+        return res.status(400).json({ message: "Thiếu dữ liệu đầu vào" });
+    }
     try {
         const user = await User.findOne({ where: { username } });
         if (!user) return res.status(404).json({ error: 'Không tìm thấy người dùng.' });
@@ -65,7 +69,9 @@ exports.changePasswordByUsername = async (req, res) => {
 
 exports.getUserProfileByUsername = async (req, res) => {
     const { username } = req.params;
-
+    if (!username) {
+        return res.status(400).json({ message: "Thiếu dữ liệu đầu vào" });
+    }
     try {
         const user = await User.findOne({
             where: { username },
@@ -73,8 +79,26 @@ exports.getUserProfileByUsername = async (req, res) => {
         });
 
         if (!user) return res.status(404).json({ error: "User not found" });
-
         res.json(user.UserProfile || {}); // Trả về {} nếu chưa có detail
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Lỗi server khi lấy thông tin chi tiết." });
+    }
+};
+
+exports.getUserInfoByUsername = async (req, res) => {
+    const { username } = req.params;
+    if (!username) {
+        return res.status(400).json({ message: "Thiếu dữ liệu đầu vào" });
+    }
+    try {
+        const user = await User.findOne({
+            where: { username },
+            attributes: { exclude: ['password'] }
+        });
+
+        if (!user) return res.status(404).json({ error: "User not found" });
+        res.json(user || {}); // Trả về {} nếu chưa có detail
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Lỗi server khi lấy thông tin chi tiết." });
@@ -90,7 +114,7 @@ exports.createInvestment = async (req, res) => {
         }
 
         // 1. Tìm user_id và total_capital
-        const user = await userService.findUserByUsername(username);
+        const user = await userService.getTotalCaptitalByUsername(username);
 
         if (!user) {
             return res.status(404).json({ message: "Không tìm thấy người dùng" });
@@ -170,3 +194,70 @@ exports.getSubscriptionByUsernameAndBotName = async (req, res) => {
     }
 };
 
+exports.getTotalCaptitalByUsername = async (req, res) => {
+
+    const { username } = req.params;
+    if (!username) {
+        return res.status(400).json({ message: "Thiếu dữ liệu đầu vào" });
+    }
+
+    try {
+        const orders = await userService.getTotalCaptitalByUsername(username);
+        res.status(200).json(orders);
+    } catch (error) {
+        console.error('Lỗi khi lấy investment_orders:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+};
+
+exports.getUserInvestmentSummary = async (req, res) => {
+
+    const { username } = req.params;
+    if (!username) {
+        return res.status(400).json({ message: "Thiếu dữ liệu đầu vào" });
+    }
+
+    try {
+        const investmentSummaryrs = await userService.getUserInvestmentSummary(username);
+        res.status(200).json(investmentSummaryrs);
+    } catch (error) {
+        console.error('Lỗi khi lấy Investment Summaryrs:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+};
+
+exports.getUserProfits = async (req, res) => {
+
+    const { username } = req.params;
+    if (!username) {
+        return res.status(400).json({ message: "Thiếu dữ liệu đầu vào" });
+    }
+
+    try {
+        const investmentSummaryrs = await userService.getUserProfits(username);
+        res.status(200).json(investmentSummaryrs);
+    } catch (error) {
+        console.error('Lỗi khi lấy User Profits:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+};
+
+exports.getUserBotSubcribedGains = async (req, res) => {
+
+    const { username } = req.params;
+    if (!username) {
+        return res.status(400).json({ message: "Thiếu dữ liệu đầu vào" });
+    }
+
+    try {
+        const investmentSummaryrs = await userService.getUserBotSubcribedGains(username);
+        res.status(200).json(investmentSummaryrs);
+    } catch (error) {
+        console.error('Lỗi khi lấy User Profits:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+};
