@@ -89,8 +89,7 @@ const Profile = () => {
       <div className="flex-grow-1 p-4">
         {activeTab === 'dashboard' && (
           <div>
-            <h2 className="mb-4">Dashboard Tổng Quan</h2>
-            <h4 className="text-info mb-3">Biểu đồ tổng lãi/lỗ</h4>
+            <h2 className="text-info mb-3">Tăng trưởng bot đăng kí tín hiệu</h2>
 
             {loading ? (
               <div className="d-flex align-items-center text-muted">
