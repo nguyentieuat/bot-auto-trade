@@ -39,7 +39,7 @@ const AdminDashboard = () => {
             </ul>
 
             {/* Tab Content */}
-            <div>
+            <div className="bg-dark text-light p-4 rounded shadow">
                 {activeTab === 'transactions' && <AdminTransactions />}
                 {activeTab === 'investments' && <InvestmentOrdersPage />}
                 {activeTab === 'guestRequests' && <GuestJoinRequestList />}

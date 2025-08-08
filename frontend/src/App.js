@@ -59,7 +59,7 @@ function App() {
   }, []);
 
   return (
-    <div className="App" style={bgStyle}>
+    <div className="App background-container" >
       <Router>
         <Nav />   {/*  HIỂN THỊ NAV Ở MỌI TRANG */}
         <main style={{ paddingTop: '75px' }}> {/* để tránh bị đè bởi Nav fixed-top */}

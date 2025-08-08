@@ -24,98 +24,64 @@ const BotDetail = ({ bot, onBack }) => {
   const [selectedPackageId, setSelectedPackageId] = useState(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isSubscribing, setIsSubscribing] = useState(false);
-
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isPremiumSubscribed, setIsPremiumSubscribed] = useState(false);
   const [userCapital, setUserCapital] = useState(0.0);
-
-  const [channelLinkFree, setChannelLinkFree] = useState('');
-  const [channelLinkPre, setChannelLinkPre] = useState('');
+  const [channelLinks, setChannelLinks] = useState({ free: '', premium: '' });
   const [subscriptionPackages, setSubscriptionPackages] = useState([]);
-  const [effectiveTelegramLink, setEffectiveTelegramLink] = useState('');
 
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || 'null');
 
-  const checkSubscription = async () => {
-    try {
-      const res = await axios.get(`${backendUrl}/api/subscriptions/${user.username}/${bot.name}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      // kiểm tra chắc chắn response có dữ liệu hợp lệ
-      if (res.data && res.data.bot_name === bot.name) {
-        setIsPremiumSubscribed(true);
-      } else {
-        setIsPremiumSubscribed(false);
-      }
-    } catch (err) {
-      console.error('Failed to fetch user subscriptions:', err);
-      setIsPremiumSubscribed(false); // fallback an toàn
-    }
-  };
-
   useEffect(() => {
-    if (!token || !user) {
-      setIsAuthenticated(false);
-      return;
-    }
-
+    if (!token || !user) return setIsAuthenticated(false);
     setIsAuthenticated(true);
 
-    const fetchUserInfo = async () => {
-      try {
-        const res = await axios.get(`${backendUrl}/api/users/${user.username}/info`, {
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+    const fetchInitialData = async () => {
+      const [userInfoRes, subscriptionRes, botLinksRes, packagesRes] = await Promise.allSettled([
+        axios.get(`${backendUrl}/api/users/${user.username}/info`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get(`${backendUrl}/api/subscriptions/${user.username}/${bot.name}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get(`${backendUrl}/api/bot-chanel/${bot.name}`),
+        axios.get(`${backendUrl}/api/subscription-bot-price/${bot.name}`)
+      ]);
+
+      if (userInfoRes.status === 'fulfilled') {
+        const capital = parseFloat(userInfoRes.value?.data?.total_capital ?? 0);
+        setUserCapital(capital);
+      }
+
+      if (subscriptionRes.status === 'fulfilled') {
+        setIsPremiumSubscribed(subscriptionRes.value?.data?.bot_name === bot.name);
+      }
+
+      if (botLinksRes.status === 'fulfilled') {
+        const data = botLinksRes.value?.data || {};
+        setChannelLinks({
+          free: data.channel_link_free || '',
+          premium: data.channel_link_pre || ''
         });
-        setUserCapital(parseFloat(res.data.total_capital));
-      } catch (err) {
-        console.error('Failed to fetch user info:', err);
-        setIsAuthenticated(false);
+      }
+
+      if (packagesRes.status === 'fulfilled') {
+        setSubscriptionPackages(packagesRes.value?.data || []);
       }
     };
 
-    fetchUserInfo();
-    checkSubscription();
-  }, []);
-
-  useEffect(() => {
-    if (!bot?.name) return;
-
-    const fetchBotLinks = async () => {
-      try {
-        const res = await axios.get(`${backendUrl}/api/bot-chanel/${bot.name}`);
-        setChannelLinkFree(res.data?.channel_link_free || '');
-        setChannelLinkPre(res.data?.channel_link_pre || '');
-      } catch (err) {
-        console.error('Failed to fetch bot channel links:', err);
-      }
-    };
-
-    const fetchPackages = async () => {
-      try {
-        const res = await axios.get(`${backendUrl}/api/subscription-bot-price/${bot.name}`);
-        setSubscriptionPackages(res.data || []);
-      } catch (err) {
-        console.error('Failed to fetch subscription packages:', err);
-      }
-    };
-
-    fetchBotLinks();
-    fetchPackages();
+    fetchInitialData();
   }, [bot?.name]);
 
   const stats = useMemo(() => {
     if (!bot?.data) return null;
 
     if (timeFilter === 'All') return calculateBacktestStats(bot.data);
-
     if (timeFilter === 'YTD') {
       const startOfYear = new Date(new Date().getFullYear(), 0, 1);
-      const recentData = bot.data.filter((d) => new Date(d.date) >= startOfYear);
-      return calculateBacktestStats(recentData);
+      return calculateBacktestStats(bot.data.filter((d) => new Date(d.date) >= startOfYear));
     }
-
     const option = timeOptions.find((opt) => opt.label === timeFilter);
     return calculateRecentStats(bot.data, { amount: option.amount, unit: option.unit });
   }, [timeFilter, bot?.data]);
@@ -124,67 +90,48 @@ const BotDetail = ({ bot, onBack }) => {
     if (!bot?.data) return [];
 
     if (timeFilter === 'All') return bot.data;
-
     if (timeFilter === 'YTD') {
       const startOfYear = new Date(new Date().getFullYear(), 0, 1);
       return bot.data.filter((d) => new Date(d.date) >= startOfYear);
     }
-
     const option = timeOptions.find((opt) => opt.label === timeFilter);
     const cutoff = dayjs().subtract(option.amount, option.unit);
     return bot.data.filter((d) => dayjs(d.date).isAfter(cutoff));
   }, [timeFilter, bot?.data]);
 
   const handleSubscription = () => {
+    if (!isAuthenticated) return setShowLoginModal(true);
     setShowPackageOptions(true);
   };
 
   const confirmSubscription = async () => {
-    if (!selectedPackageId) {
-      alert('Vui lòng chọn một gói trước.');
-      return;
-    }
-
     const selectedPkg = subscriptionPackages.find((pkg) => pkg.months === selectedPackageId);
-    if (!selectedPkg) {
-      alert('Không tìm thấy gói đã chọn.');
-      return;
-    }
+    if (!selectedPkg) return alert('Vui lòng chọn một gói hợp lệ.');
 
     const finalPrice = parseFloat(selectedPkg.final_price);
-    if (userCapital < finalPrice) {
-      alert('⚠️ Số dư không đủ để đăng ký gói này.');
-      return;
-    }
+    if (userCapital < finalPrice) return alert('⚠️ Số dư không đủ để đăng ký gói này.');
 
     try {
       setIsSubscribing(true);
       await axios.post(
         `${backendUrl}/api/subscribe/${user.username}/${bot.name}`,
-        {
-          months: selectedPkg.months,
-          final_price: finalPrice
-        },
+        { months: selectedPkg.months, final_price: finalPrice },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       alert('🎉 Đăng ký thành công!');
-      await checkSubscription();
+      setIsPremiumSubscribed(true);
       setUserCapital((prev) => prev - finalPrice);
       setShowPackageOptions(false);
     } catch (err) {
-      console.error('Lỗi khi đăng ký gói:', err);
-      alert('❌ Có lỗi xảy ra khi đăng ký. Vui lòng thử lại sau.');
+      console.error('Lỗi khi đăng ký:', err);
+      alert('❌ Đăng ký thất bại. Vui lòng thử lại.');
     } finally {
       setIsSubscribing(false);
     }
   };
 
-  useEffect(() => {
-    setEffectiveTelegramLink(
-      isAuthenticated && isPremiumSubscribed ? channelLinkPre : channelLinkFree
-    );
-  }, [isAuthenticated, isPremiumSubscribed, channelLinkPre, channelLinkFree]);
+  const telegramLink = isAuthenticated && isPremiumSubscribed ? channelLinks.premium : channelLinks.free;
 
   if (!bot) {
     return (
@@ -205,9 +152,7 @@ const BotDetail = ({ bot, onBack }) => {
           onChange={(e) => setTimeFilter(e.target.value)}
         >
           {timeOptions.map((opt) => (
-            <option key={opt.label} value={opt.label}>
-              {opt.label}
-            </option>
+            <option key={opt.label} value={opt.label}>{opt.label}</option>
           ))}
         </select>
       </div>
@@ -225,9 +170,9 @@ const BotDetail = ({ bot, onBack }) => {
               📩 {isPremiumSubscribed ? 'Nhận tín hiệu nâng cao' : 'Nhận tín hiệu miễn phí'} qua Telegram
             </p>
 
-            {effectiveTelegramLink ? (
+            {telegramLink ? (
               <a
-                href={effectiveTelegramLink.replace(/^"|"$/g, '')}
+                href={telegramLink.replace(/^"|"$/g, '')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-success"
@@ -238,7 +183,7 @@ const BotDetail = ({ bot, onBack }) => {
               <p className="text-secondary">Không tìm thấy link Telegram</p>
             )}
 
-            <p className="text-secondary mt-2" style={{ fontSize: '0.9rem' }}>
+            <p className="mt-2 small text-secondary">
               {isPremiumSubscribed
                 ? '* Bạn đang nhận các tín hiệu nâng cao từ bot này.'
                 : '* Bạn sẽ nhận được các tín hiệu giao dịch miễn phí tại đây.'}
@@ -249,21 +194,21 @@ const BotDetail = ({ bot, onBack }) => {
             <div className="mt-4 p-3 bg-dark text-light rounded">
               <h5 className="text-center mb-3">✨ Đăng ký nhận tín hiệu nâng cao</h5>
 
-              {!showPackageOptions && (
+              {!showPackageOptions ? (
                 <button className="btn btn-primary w-100 mt-3" onClick={handleSubscription}>
                   🔐 Đăng ký ngay
                 </button>
-              )}
-
-              {showPackageOptions && (
-                <div className="mt-3">
+              ) : (
+                <>
                   <h6 className="text-light">Chọn gói đăng ký:</h6>
                   <ul className="list-group mb-3">
                     {subscriptionPackages.map((pkg) => (
                       <li
                         key={pkg.months}
                         onClick={() => setSelectedPackageId(pkg.months)}
-                        className={`list-group-item d-flex justify-content-between align-items-center bg-dark text-light border-light ${selectedPackageId === pkg.months ? 'border-warning border-3 shadow-lg' : ''}`}
+                        className={`list-group-item d-flex justify-content-between align-items-center bg-dark text-light border-light ${
+                          selectedPackageId === pkg.months ? 'border-warning border-3 shadow-lg' : ''
+                        }`}
                         style={{ cursor: 'pointer' }}
                       >
                         {pkg.months} tháng
@@ -280,16 +225,22 @@ const BotDetail = ({ bot, onBack }) => {
                   >
                     {isSubscribing ? '🔄 Đang xử lý...' : '✅ Xác nhận đăng ký'}
                   </button>
-                </div>
+                </>
               )}
             </div>
           )}
         </div>
       </div>
 
-      <button className="btn btn-outline-secondary mb-4 mt-4" onClick={onBack}>
-        ← Back to list
-      </button>
+      <div className="text-start">
+  <button
+    className="btn btn-outline-light mb-4 mt-4 px-4 py-2 fw-semibold"
+    style={{ borderRadius: '8px', fontSize: '1rem' }}
+    onClick={onBack}
+  >
+    ← Trở về danh sách
+  </button>
+</div>
 
       <p className="text-light mt-4">{bot.description}</p>
 
