@@ -293,6 +293,47 @@ router.get('/api/admin/guest-join-requests', authenticateTokenAdmin, async (req,
     }
 });
 
+// Tổng hợp theo bot
+router.get('/api/admin/analytics/bot-sales', authenticateTokenAdmin, async (req, res) => {
+    try {
+        const result = await pool.query(`
+      SELECT 
+        b.id,
+        b.name,
+        b.name_display,
+        COUNT(usb.id) AS subscriptions_count,
+        COALESCE(SUM(usb.price), 0) AS total_revenue
+      FROM bots b
+      LEFT JOIN user_subscription_bots usb ON b.id = usb.bot_id
+      GROUP BY b.id, b.name, b.name_display
+      ORDER BY total_revenue DESC
+    `);
+        res.json(result);
+    } catch (err) {
+        console.error('Error getBotSalesStats', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Tổng hợp theo gói
+router.get('/api/admin/analytics/package-sales', authenticateTokenAdmin, async (req, res) => {
+    try {
+        const result = await pool.query(`
+      SELECT 
+        package_name,
+        COUNT(*) AS subscriptions_count,
+        SUM(total_price) AS total_revenue
+      FROM user_subscriptions
+      GROUP BY package_name
+      ORDER BY total_revenue DESC
+    `);
+        res.json(result);
+    } catch (err) {
+        console.error('Error getPackageSalesStats', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 
 
 module.exports = router;
