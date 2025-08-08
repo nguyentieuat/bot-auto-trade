@@ -17,7 +17,7 @@ import AdminDashboard from './page/admin/AdminDashboard';
 const backendUrl = process.env.REACT_APP_API_URL;
 
 const bgStyle = {
-  backgroundImage: "url('/assets/images/background.jpg')",
+  backgroundImage: "url('/assets/images/background.png')",
   backgroundSize: 'cover',
   backgroundPosition: 'center',
   backgroundAttachment: 'fixed',

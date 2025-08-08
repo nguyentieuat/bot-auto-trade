@@ -14,8 +14,22 @@ const Nav = () => {
   return (
     <nav className="navbar navbar-expand-lg py-3 fixed-top bg-dark shadow">
       <div className="container">
-        <Link to="/" className="navbar-brand text-info fw-bold">
-          MyPage<span className="text-success">VN</span>
+        <Link to="/" className="navbar-brand d-flex align-items-center gap-2">
+          <img
+            src="/assets/images/logo.png"
+            alt="Smooth - Kiến tạo giá trị"
+            style={{ height: '40px' }}
+          />
+          <span
+            className="fw-bold"
+            style={{
+              fontFamily: "'Orbitron', sans-serif",
+              color: '#0ff',
+              textShadow: '0 0 10px #0ff, 0 0 20px #0ff',
+            }}
+          >
+            Smooth
+          </span>
         </Link>
         <div className="collapse navbar-collapse">
           <ul className="navbar-nav ms-auto gap-3">

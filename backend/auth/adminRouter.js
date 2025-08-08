@@ -249,22 +249,31 @@ router.post('/api/admin/investment-orders/:id', authenticateTokenAdmin, async (r
 
 router.get('/api/admin/guest-join-requests', authenticateTokenAdmin, async (req, res) => {
     try {
-        // Lấy toàn bộ requests
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        // Đếm tổng số bản ghi
+        const countResult = await pool.query('SELECT COUNT(*) FROM guest_join_requests');
+        const total = parseInt(countResult.rows[0].count);
+
+        // Lấy dữ liệu với phân trang
         const result = await pool.query(`
-      SELECT * FROM guest_join_requests
-      ORDER BY submitted_at DESC
-    `);
+            SELECT * FROM guest_join_requests
+            ORDER BY submitted_at DESC
+            LIMIT $1 OFFSET $2
+        `, [limit, offset]);
 
         const requests = result.rows;
 
-        // Lấy toàn bộ bots (id và name_display)
+        // Lấy toàn bộ bots
         const botResult = await pool.query(`SELECT id, name_display FROM bots`);
         const botMap = {};
         botResult.rows.forEach(bot => {
             botMap[bot.id] = bot.name_display;
         });
 
-        // Gắn tên bot vào từng request
+        // Gắn tên bot
         const enrichedRequests = requests.map((r) => ({
             ...r,
             selected_bot_names: Array.isArray(r.selected_bot_ids)
@@ -272,12 +281,18 @@ router.get('/api/admin/guest-join-requests', authenticateTokenAdmin, async (req,
                 : [],
         }));
 
-        res.json(enrichedRequests);
+        res.json({
+            data: enrichedRequests,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+        });
     } catch (err) {
         console.error('Lỗi khi lấy guest_join_requests:', err);
         res.status(500).json({ message: 'Lỗi server' });
     }
 });
+
 
 
 module.exports = router;
