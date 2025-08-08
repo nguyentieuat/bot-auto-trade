@@ -10,11 +10,12 @@ const authenticateToken = require('./auth/authMiddleware');
 const { getPackages, getTimeDiscounts, guestJoin, caculatePrice, confirmSubscription, subscribeBot } = require('./controllers/packageController');
 
 require('./batch/updateDailyBotStats');
+require('./batch/dailyUserProfits');
+
 
 const app = express();
-
-app.use(cors());
 app.use(express.json());
+app.use(cors());
 
 // API route
 app.get('/api/fbt-data', getAllActiveBotStats);
@@ -30,7 +31,7 @@ app.get('/api/investment-orders/:username', authenticateToken, getInvestmentOrde
 app.get('/api/subscriptions/:username/:botName', authenticateToken, getSubscriptionByUsernameAndBotName);
 app.get('/api/investment-summary/:username', authenticateToken, getUserInvestmentSummary);
 app.get('/api/user-profits/:username', authenticateToken, getUserProfits);
-app.get('/api/users/:username/subscribed-bots/gains', authenticateToken, getUserBotSubcribedGains );
+app.get('/api/users/:username/subscribed-bots/gains', authenticateToken, getUserBotSubcribedGains);
 
 // Bot
 app.get('/api/bots/active', getActiveBots);
