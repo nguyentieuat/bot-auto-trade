@@ -12,7 +12,7 @@ const Nav = () => {
   }, [location]); // khi URL thay đổi → load lại user từ localStorage
 
   return (
-    <nav className="navbar navbar-expand-lg py-3 fixed-top bg-dark shadow">
+    <nav className="navbar navbar-expand-lg py-3 bg-dark fixed-top">
       <div className="container">
         <Link to="/" className="navbar-brand d-flex align-items-center gap-2">
           <img

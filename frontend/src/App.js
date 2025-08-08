@@ -59,10 +59,10 @@ function App() {
   }, []);
 
   return (
-    <div className="App background-container" >
+    <div className="App" >
       <Router>
         <Nav />   {/*  HIỂN THỊ NAV Ở MỌI TRANG */}
-        <main style={{ paddingTop: '75px' }}> {/* để tránh bị đè bởi Nav fixed-top */}
+        <main style={{ paddingTop: '80px' }}> {/* để tránh bị đè bởi Nav fixed-top */}
           <Routes>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/*" element={<Home />} />

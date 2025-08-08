@@ -183,7 +183,7 @@ const BotDetail = ({ bot, onBack }) => {
               <p className="text-secondary">Không tìm thấy link Telegram</p>
             )}
 
-            <p className="mt-2 small text-secondary">
+            <p className="mt-2 small" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
               {isPremiumSubscribed
                 ? '* Bạn đang nhận các tín hiệu nâng cao từ bot này.'
                 : '* Bạn sẽ nhận được các tín hiệu giao dịch miễn phí tại đây.'}
@@ -206,9 +206,8 @@ const BotDetail = ({ bot, onBack }) => {
                       <li
                         key={pkg.months}
                         onClick={() => setSelectedPackageId(pkg.months)}
-                        className={`list-group-item d-flex justify-content-between align-items-center bg-dark text-light border-light ${
-                          selectedPackageId === pkg.months ? 'border-warning border-3 shadow-lg' : ''
-                        }`}
+                        className={`list-group-item d-flex justify-content-between align-items-center bg-dark text-light border-light ${selectedPackageId === pkg.months ? 'border-warning border-3 shadow-lg' : ''
+                          }`}
                         style={{ cursor: 'pointer' }}
                       >
                         {pkg.months} tháng
@@ -233,14 +232,14 @@ const BotDetail = ({ bot, onBack }) => {
       </div>
 
       <div className="text-start">
-  <button
-    className="btn btn-outline-light mb-4 mt-4 px-4 py-2 fw-semibold"
-    style={{ borderRadius: '8px', fontSize: '1rem' }}
-    onClick={onBack}
-  >
-    ← Trở về danh sách
-  </button>
-</div>
+        <button
+          className="btn btn-outline-light mb-4 mt-4 px-4 py-2 fw-semibold"
+          style={{ borderRadius: '8px', fontSize: '1rem' }}
+          onClick={onBack}
+        >
+          ← Trở về danh sách
+        </button>
+      </div>
 
       <p className="text-light mt-4">{bot.description}</p>
 
