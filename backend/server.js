@@ -15,26 +15,7 @@ require('./batch/dailyUserProfits');
 
 const app = express();
 app.use(express.json());
-
-
-const allowedOrigins = [
-  'https://bot-auto-trade.vercel.app', // <-- Frontend domain
-  'http://localhost:3000'              // <-- Cho dev local
-];
-
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true // Cho phép gửi token hoặc cookie nếu có
-};
-
-app.use(cors(corsOptions));
+app.use(cors());
 
 // API route
 app.get('/api/fbt-data', getAllActiveBotStats);
