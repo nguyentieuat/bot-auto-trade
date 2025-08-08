@@ -12,7 +12,6 @@ const { getPackages, getTimeDiscounts, guestJoin, caculatePrice, confirmSubscrip
 require('./batch/updateDailyBotStats');
 
 const app = express();
-const PORT = 3001;
 
 app.use(cors());
 app.use(express.json());
@@ -61,6 +60,7 @@ app.post('/api/subscribe/:username/:botName', authenticateToken, subscribeBot);
 app.use(adminRouter);
 
 // Start server
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
