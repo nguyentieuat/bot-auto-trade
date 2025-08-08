@@ -34,45 +34,63 @@ const BotDetail = ({ bot, onBack }) => {
   const user = JSON.parse(localStorage.getItem('user') || 'null');
 
   useEffect(() => {
-    if (!token || !user) return setIsAuthenticated(false);
-    setIsAuthenticated(true);
+    const isAuth = token && user;
+    setIsAuthenticated(!!isAuth);
 
-    const fetchInitialData = async () => {
-      const [userInfoRes, subscriptionRes, botLinksRes, packagesRes] = await Promise.allSettled([
-        axios.get(`${backendUrl}/api/users/${user.username}/info`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get(`${backendUrl}/api/subscriptions/${user.username}/${bot.name}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get(`${backendUrl}/api/bot-chanel/${bot.name}`),
-        axios.get(`${backendUrl}/api/subscription-bot-price/${bot.name}`)
-      ]);
+    const fetchData = async () => {
+      const requests = [];
 
-      if (userInfoRes.status === 'fulfilled') {
-        const capital = parseFloat(userInfoRes.value?.data?.total_capital ?? 0);
-        setUserCapital(capital);
+      if (isAuth) {
+        requests.push(
+          axios.get(`${backendUrl}/api/users/${user.username}/info`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`${backendUrl}/api/subscriptions/${user.username}/${bot.name}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`${backendUrl}/api/subscription-bot-price/${bot.name}`)
+        );
       }
 
-      if (subscriptionRes.status === 'fulfilled') {
-        setIsPremiumSubscribed(subscriptionRes.value?.data?.bot_name === bot.name);
-      }
+      // Luôn luôn fetch link kênh bot
+      const botLinksReq = axios.get(`${backendUrl}/api/bot-chanel/${bot.name}`);
 
-      if (botLinksRes.status === 'fulfilled') {
-        const data = botLinksRes.value?.data || {};
-        setChannelLinks({
-          free: data.channel_link_free || '',
-          premium: data.channel_link_pre || ''
-        });
-      }
+      try {
+        const allResults = await Promise.allSettled([...requests, botLinksReq]);
 
-      if (packagesRes.status === 'fulfilled') {
-        setSubscriptionPackages(packagesRes.value?.data || []);
+        if (isAuth) {
+          const [userInfoRes, subscriptionRes, packagesRes] = allResults;
+
+          if (userInfoRes.status === 'fulfilled') {
+            const capital = parseFloat(userInfoRes.value?.data?.total_capital ?? 0);
+            setUserCapital(capital);
+          }
+
+          if (subscriptionRes.status === 'fulfilled') {
+            setIsPremiumSubscribed(subscriptionRes.value?.data?.bot_name === bot.name);
+          }
+
+          if (packagesRes.status === 'fulfilled') {
+            setSubscriptionPackages(packagesRes.value?.data || []);
+          }
+        }
+
+        const botLinksRes = allResults[allResults.length - 1]; // Luôn là cuối mảng
+        if (botLinksRes.status === 'fulfilled') {
+          const data = botLinksRes.value?.data || {};
+          setChannelLinks({
+            free: data.channel_link_free || '',
+            premium: data.channel_link_pre || ''
+          });
+        }
+      } catch (err) {
+        console.error('Lỗi khi fetch dữ liệu bot:', err);
       }
     };
 
-    fetchInitialData();
+    fetchData();
   }, [bot?.name]);
+
 
   const stats = useMemo(() => {
     if (!bot?.data) return null;
