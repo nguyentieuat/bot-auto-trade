@@ -52,11 +52,6 @@ exports.depositHistoryUser = async (username) => {
             ORDER BY dr.requested_at DESC
         `, [username]);
 
-        // Nếu không có bản ghi nào
-        if (result.rows.length === 0) {
-            return { error: 'No deposit history found for this user.' };
-        }
-
         return { deposits: result.rows };
     } catch (err) {
         console.error('Error fetching deposit history:', err);
