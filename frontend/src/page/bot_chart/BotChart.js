@@ -1,7 +1,9 @@
 import React from 'react';
 import {
   Chart as ChartJS,
+  BarController,
   BarElement,
+  LineController,
   LineElement,
   PointElement,
   LinearScale,
@@ -15,6 +17,8 @@ import { Chart } from 'react-chartjs-2';
 
 // Register all Chart.js components
 ChartJS.register(
+  BarController,
+  LineController,
   BarElement,
   LineElement,
   PointElement,
