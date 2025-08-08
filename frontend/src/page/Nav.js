@@ -9,11 +9,12 @@ const Nav = () => {
 
   useEffect(() => {
     setUser(JSON.parse(localStorage.getItem('user')));
-  }, [location]); // khi URL thay đổi → load lại user từ localStorage
+  }, [location]);
 
   return (
     <nav className="navbar navbar-expand-lg py-3 bg-dark fixed-top">
       <div className="container">
+        {/* Logo */}
         <Link to="/" className="navbar-brand d-flex align-items-center gap-2">
           <img
             src="/assets/images/logo.png"
@@ -31,8 +32,23 @@ const Nav = () => {
             Smooth
           </span>
         </Link>
-        <div className="collapse navbar-collapse">
-          <ul className="navbar-nav ms-auto gap-3">
+
+        {/* Toggle Button for Mobile */}
+        <button
+          className="navbar-toggler custom-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span className="navbar-toggler-icon"></span>
+        </button>
+
+        {/* Collapsible Nav Links */}
+        <div className="collapse navbar-collapse" id="navbarNav">
+          <ul className="navbar-nav ms-auto gap-lg-3">
             {navItems.map((item, index) => (
               <li className="nav-item" key={index}>
                 <a
@@ -46,12 +62,14 @@ const Nav = () => {
             ))}
           </ul>
 
-          <a href="/tham-gia" className="btn btn-outline-light ms-4 rounded-pill px-4">
+          {/* Button - Tham Gia Ngay */}
+          <a href="/tham-gia" className="btn btn-outline-light ms-lg-4 mt-3 mt-lg-0 rounded-pill px-4">
             Tham gia ngay →
           </a>
 
+          {/* User Dropdown / Login Button */}
           {user ? (
-            <div className="dropdown position-absolute end-0 top-50 translate-middle-y me-3" style={{ zIndex: 1000 }}>
+            <div className="dropdown ms-lg-3 mt-3 mt-lg-0">
               <button
                 className="btn btn-success dropdown-toggle rounded-pill px-4"
                 type="button"
@@ -84,8 +102,7 @@ const Nav = () => {
           ) : (
             <Link
               to="/login-register"
-              className="btn btn-info rounded-pill px-4 position-absolute end-0 top-50 translate-middle-y me-3"
-              style={{ zIndex: 1000 }}
+              className="btn btn-info rounded-pill px-4 ms-lg-3 mt-3 mt-lg-0"
             >
               <i className="fas fa-user"></i>
             </Link>
