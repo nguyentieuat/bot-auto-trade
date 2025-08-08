@@ -263,7 +263,7 @@ const BotDetail = ({ bot, onBack }) => {
                       <li
                         key={pkg.months}
                         onClick={() => setSelectedPackageId(pkg.months)}
-                        className={`list-group-item d-flex justify-content-between align-items-center bg-dark text-light border-light ${selectedPackageId === pkg.months ? 'border-success border-2' : ''}`}
+                        className={`list-group-item d-flex justify-content-between align-items-center bg-dark text-light border-light ${selectedPackageId === pkg.months ? 'border-warning border-3 shadow-lg' : ''}`}
                         style={{ cursor: 'pointer' }}
                       >
                         {pkg.months} tháng

@@ -83,25 +83,34 @@ const Deposit = ({ user }) => {
             {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
 
             {bankInfo && (
-                <div className="d-flex flex-wrap gap-4 align-items-start mt-4">
-                    <div className="bg-light text-dark p-3 rounded shadow w-100 w-md-50">
-                        <h5>Thông tin tài khoản hệ thống:</h5>
-                        <p><strong>Ngân hàng:</strong> {bankInfo.bank_name}</p>
-                        <p><strong>Số tài khoản:</strong> {bankInfo.account_number}</p>
-                        <p><strong>Chủ tài khoản:</strong> {bankInfo.account_holder}</p>
-                        <p>
-                            <strong>Nội dung chuyển khoản:</strong> <br />
-                            <span className="text-danger">NAPTIEN_{user.username.toUpperCase()}</span>
-                        </p>
+                <div className="row mt-4">
+                    {/* Thông tin tài khoản - chiếm 60% */}
+                    <div className="col-12 col-md-7">
+                        <div className="bg-light text-dark p-3 rounded shadow h-100">
+                            <h5>Thông tin tài khoản hệ thống:</h5>
+                            <p><strong>Ngân hàng:</strong> {bankInfo.bank_name}</p>
+                            <p><strong>Số tài khoản:</strong> {bankInfo.account_number}</p>
+                            <p><strong>Chủ tài khoản:</strong> {bankInfo.account_holder}</p>
+                            <p>
+                                <strong>Nội dung chuyển khoản:</strong><br />
+                                <span className="text-danger">NAPTIEN_{user.username.toUpperCase()}</span>
+                            </p>
+                        </div>
                     </div>
 
+                    {/* QR Code - chiếm 40% */}
                     {bankInfo.qr_code && (
-                        <div>
+                        <div className="col-12 col-md-5 d-flex flex-column align-items-center mt-3 mt-md-0">
                             <h6>Mã QR chuyển khoản</h6>
                             <img
                                 src={bankInfo.qr_code}
                                 alt="QR chuyển khoản"
-                                style={{ width: '200px', border: '1px solid #ccc', borderRadius: '8px' }}
+                                style={{
+                                    width: '100%',
+                                    maxWidth: '250px',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '8px'
+                                }}
                             />
                         </div>
                     )}

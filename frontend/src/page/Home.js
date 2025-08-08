@@ -36,6 +36,7 @@ function Home() {
       });
 
       const botsObj = res.data.bots || {};
+      debugger
       const newBots = Object.entries(botsObj).map(([botName, data], index) => ({
         id: `${botName}-${pageIndex}-${index}`,
         name: botName,
@@ -51,7 +52,7 @@ function Home() {
       setHasMore(res.data.hasMore);
       setPage((prev) => prev + 1);
 
-      // ✅ CHỈ CACHE NẾU ĐÃ LOAD HẾT
+      // CHỈ CACHE NẾU ĐÃ LOAD HẾT
       if (!res.data.hasMore) {
         localStorage.setItem(CACHE_KEY, JSON.stringify({
           timestamp: Date.now(),
