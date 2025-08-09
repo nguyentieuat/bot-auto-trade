@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import navItems from './data/navData';
 import { Link, useLocation } from 'react-router-dom';
 const backendUrl = process.env.REACT_APP_API_URL;
@@ -6,6 +6,36 @@ const backendUrl = process.env.REACT_APP_API_URL;
 const Nav = () => {
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')));
   const location = useLocation(); // bắt sự thay đổi đường dẫn để reload user
+
+  const [isNavCollapsed, setIsNavCollapsed] = useState(true);
+  const collapseRef = useRef(null);
+  // Bắt sự kiện click ngoài để đóng menu
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        collapseRef.current &&
+        !collapseRef.current.contains(event.target) &&
+        !event.target.classList.contains('navbar-toggler') &&
+        !event.target.closest('.navbar-toggler')
+      ) {
+        setIsNavCollapsed(true);
+      }
+    }
+
+    if (!isNavCollapsed) {
+      document.addEventListener('click', handleClickOutside);
+    } else {
+      document.removeEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isNavCollapsed]);
+
+  const toggleNav = () => {
+    setIsNavCollapsed(!isNavCollapsed);
+  };
 
   useEffect(() => {
     setUser(JSON.parse(localStorage.getItem('user')));
@@ -37,17 +67,20 @@ const Nav = () => {
         <button
           className="navbar-toggler custom-toggler"
           type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
           aria-controls="navbarNav"
-          aria-expanded="false"
+          aria-expanded={!isNavCollapsed}
           aria-label="Toggle navigation"
+          onClick={toggleNav}
         >
           <span className="navbar-toggler-icon"></span>
         </button>
 
         {/* Collapsible Nav Links */}
-        <div className="collapse navbar-collapse" id="navbarNav">
+        <div
+          className={`collapse navbar-collapse ${isNavCollapsed ? '' : 'show'}`}
+          id="navbarNav"
+          ref={collapseRef}
+        >
           <ul className="navbar-nav ms-auto gap-lg-3">
             {navItems.map((item, index) => (
               <li className="nav-item" key={index}>
