@@ -1,8 +1,7 @@
-const { readAllCSVFiles } = require('../services/fbtService');
 const path = require('path');
 const cron = require('node-cron');
 const pool = require('../db');
-const { truncateDecimal } = require('../utils/utils');
+const { truncateDecimal, readAllCSVFiles } = require('../utils/utils');
 
 async function getOrInsertBotId(botName) {
   const result = await pool.query('SELECT id FROM bots WHERE name_org = $1', [botName]);
@@ -22,7 +21,7 @@ async function saveDailyStats(botId, botName, rows) {
   for (const row of rows) {
     const date = new Date(row.Datetime).toISOString().split('T')[0];
     const gain = truncateDecimal(row.gain || 0, 6);
-    const totalGain = truncateDecimal(row.total_gain || 0, 6);
+    const totalGain =  truncateDecimal(row.total_gain || 0, 6);
 
     try {
       await pool.query(
@@ -40,7 +39,8 @@ async function saveDailyStats(botId, botName, rows) {
 
 async function updateDailyBotStats() {
   try {
-    const files = await readAllCSVFiles();
+    const dataDir = path.join(__dirname, '..', 'data', 'FBT');
+    const files = await readAllCSVFiles(dataDir);
 
     for (const file of files) {
       const botName = path.basename(file.filename, '.csv');
