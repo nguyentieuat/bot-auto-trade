@@ -18,40 +18,48 @@ const DashboardInvestSection = ({ user }) => {
   const token = localStorage.getItem('token');
 
   const fetchData = async () => {
-    setLoading(true);
-    setError(null);
+  setLoading(true);
+  setError(null);
 
-    try {
-      const [resInvestments, resSummary, resProfits] = await Promise.all([
-        fetch(`${backendUrl}/api/investment-orders/${username}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        fetch(`${backendUrl}/api/investment-summary/${username}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        fetch(`${backendUrl}/api/user-profits/${username}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-      ]);
+  try {
+    const [investmentsRes, summaryRes, profitsRes] = await Promise.allSettled([
+      fetch(`${backendUrl}/api/investment-orders/${username}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }),
+      fetch(`${backendUrl}/api/investment-summary/${username}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }),
+      fetch(`${backendUrl}/api/user-profits/${username}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }),
+    ]);
 
-      if (!resInvestments.ok || !resSummary.ok || !resProfits.ok) {
-        throw new Error("Có lỗi xảy ra khi tải dữ liệu");
-      }
-
-      const investmentsData = await resInvestments.json();
-      const summaryData = await resSummary.json();
-      const profitsData = await resProfits.json();
-
-      setInvestments(investmentsData);
-      setInvestmentSummary(summaryData);
-      setUserProfits(profitsData.data || []);
-    } catch (err) {
-      console.error("Lỗi khi fetch dữ liệu:", err);
-      setError("Không thể tải dữ liệu. Vui lòng thử lại sau.");
-    } finally {
-      setLoading(false);
+    // Xử lý kết quả từng API
+    if (investmentsRes.status === "fulfilled" && investmentsRes.value.ok) {
+      setInvestments(await investmentsRes.value.json());
+    } else {
+      console.warn("Lỗi lấy danh sách đầu tư");
     }
-  };
+
+    if (summaryRes.status === "fulfilled" && summaryRes.value.ok) {
+      setInvestmentSummary(await summaryRes.value.json());
+    } else {
+      console.warn("Lỗi lấy tóm tắt đầu tư");
+    }
+
+    if (profitsRes.status === "fulfilled" && profitsRes.value.ok) {
+      const data = await profitsRes.value.json();
+      setUserProfits(data.data || []);
+    } else {
+      console.warn("Lỗi lấy lợi nhuận người dùng");
+    }
+  } catch (err) {
+    console.error("Lỗi fetch dữ liệu:", err);
+    setError("Không thể tải dữ liệu. Vui lòng thử lại sau.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     if (!username) return;
@@ -83,7 +91,7 @@ const DashboardInvestSection = ({ user }) => {
         {/* Chart - 60% width */}
         <div className="col-md-7">
           <CapitalDistributionChart investmentSummary={investmentSummary} />
-          <p className="text-muted mt-2">Đơn vị: x1000đ</p>
+          <p className="text-muted mt-2">Đơn vị: triệu đồng</p>
         </div>
 
         {/* Form - 40% width */}

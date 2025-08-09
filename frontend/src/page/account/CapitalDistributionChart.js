@@ -13,10 +13,10 @@ const CapitalDistributionChart = ({ investmentSummary }) => {
 
   // Tạo dữ liệu với optional chaining và giá trị mặc định
   const data = [
-    { name: 'Vốn đang chờ', value: parseFloat(investmentSummary?.total_pending ?? 0) / 1000 },
-    { name: 'Vốn đã xác nhận', value: parseFloat(investmentSummary?.total_confirmed ?? 0) / 1000 },
-    { name: 'Vốn đang chạy', value: parseFloat(investmentSummary?.total_starting ?? 0) / 1000 },
-    { name: 'Vốn còn lại', value: parseFloat(investmentSummary?.remaining_capital ?? 0) / 1000 },
+    { name: 'Vốn đang chờ', value: parseFloat(investmentSummary?.total_pending ?? 0) / 1000000 },
+    { name: 'Vốn đã xác nhận', value: parseFloat(investmentSummary?.total_confirmed ?? 0) / 1000000 },
+    { name: 'Vốn đang chạy', value: parseFloat(investmentSummary?.total_starting ?? 0) / 1000000 },
+    { name: 'Vốn còn lại', value: parseFloat(investmentSummary?.remaining_capital ?? 0) / 1000000 },
   ];
 
   // Kiểm tra tất cả giá trị có phải bằng 0 không
