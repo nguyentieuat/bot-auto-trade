@@ -101,3 +101,17 @@ body::before {
     padding: 0.25rem 0.75rem;      /* padding item nhỏ lại */
   }
 }
+
+.app-footer {
+  position: fixed;       /* Cố định */
+  bottom: 0;             /* Sát đáy */
+  left: 0;               /* Sát bên trái */
+  width: auto;           /* Không chiếm hết chiều ngang */
+  background: transparent; /* Không cần nền */
+  padding: 5px 10px;
+}
+
+.app-footer .copyright {
+  font-size: 14px;
+  color: #555;           /* Màu chữ */
+}
