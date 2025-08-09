@@ -90,7 +90,7 @@ const DashboardInvestSection = ({ user, sidebarOpen }) => {
   }
 
   return (
-    <div  style={{
+    <div className="container-fluid mt-4" style={{
       marginLeft: sidebarOpen && window.innerWidth >= 768 ? 260 : 0,
       transition: 'margin-left 0.3s ease',
     }}>
