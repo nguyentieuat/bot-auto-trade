@@ -1,8 +1,27 @@
-const NodeCache = require("node-cache");
-const myCache = new NodeCache({ stdTTL: 86400 }); // TTL: 5 phút
+// services/cacheService.js
+const cache = new Map();
+
+function setCache(key, value) {
+  cache.set(key, {
+    timestamp: new Date().toDateString(),
+    data: value
+  });
+}
+
+function getCache(key) {
+  const cached = cache.get(key);
+  if (!cached) return null;
+
+  const today = new Date().toDateString();
+  if (cached.timestamp !== today) {
+    cache.delete(key); // Optional: clean up
+    return null;
+  }
+
+  return cached.data;
+}
 
 module.exports = {
-  getCache: (key) => myCache.get(key),
-  setCache: (key, value) => myCache.set(key, value),
-  clearCache: (key) => myCache.del(key),
+  setCache,
+  getCache
 };

@@ -69,7 +69,7 @@ const Nav = () => {
 
           {/* User Dropdown / Login Button */}
           {user ? (
-            <div className="dropdown ms-lg-3 mt-3 mt-lg-0">
+            <div className="dropdown position-absolute end-0 top-50 translate-middle-y me-3" style={{ zIndex: 1000 }}>
               <button
                 className="btn btn-success dropdown-toggle rounded-pill px-4"
                 type="button"
@@ -102,7 +102,8 @@ const Nav = () => {
           ) : (
             <Link
               to="/login-register"
-              className="btn btn-info rounded-pill px-4 ms-lg-3 mt-3 mt-lg-0"
+              className="btn btn-info rounded-pill px-4 position-absolute end-0 top-50 translate-middle-y me-3"
+              style={{ zIndex: 1000 }}
             >
               <i className="fas fa-user"></i>
             </Link>

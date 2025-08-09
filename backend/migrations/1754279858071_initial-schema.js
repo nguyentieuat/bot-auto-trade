@@ -34,7 +34,7 @@ exports.up = (pgm) => {
   pgm.createTable('bots', {
     id: 'id',
     name: { type: 'varchar(100)', notNull: true, unique: true },
-    name_display: { type: 'varchar(100)', notNull: true },
+    name_org: { type: 'varchar(100)', notNull: true },
     description: { type: 'text' },
     status: { type: 'varchar(20)', default: 'active' },
     risk_level: { type: 'int', default: 1, check: 'risk_level >= 1 AND risk_level <= 5' },

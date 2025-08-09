@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { getAllActiveBotStats } = require('./controllers/fbtController');
 const { updateUserInfoByUsername, changePasswordByUsername, getUserProfileByUsername, getUserInfoByUsername, createInvestment, getInvestmentOrdersByUsername, getSubscriptionByUsernameAndBotName, getUserInvestmentSummary, getUserProfits, getUserBotSubcribedGains } = require('./controllers/accountController');
-const { getActiveBots, getBotChanelsByBotName, getAllSubscriptionBot } = require('./controllers/botController');
+const { getActiveBots, getBotChanelsByBotName, getAllSubscriptionBot, getBotWithStats } = require('./controllers/botController');
 const { getSystemBankInfo, depositBankUser, depositHistoryUser, withdrawBankUser, withdrawHistoryUser } = require('./controllers/systemBankController');
 const authRoutes = require('./auth/authRouter');
 const adminRouter = require('./auth/adminRouter');
@@ -37,7 +37,7 @@ app.get('/api/users/:username/subscribed-bots/gains', authenticateToken, getUser
 app.get('/api/bots/active', getActiveBots);
 app.post("/api/investments", authenticateToken, createInvestment);
 app.get('/api/bot-chanel/:botName', getBotChanelsByBotName);
-
+app.get('/api/bots/:botName', getBotWithStats)
 
 app.get('/api/subscription-bot-price/:botName', getAllSubscriptionBot);
 

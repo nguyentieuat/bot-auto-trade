@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Bot = sequelize.define('Bot', {
     name: { type: DataTypes.STRING(100), allowNull: false },
-    name_display: { type: DataTypes.STRING(100), allowNull: false },
+    name_org: { type: DataTypes.STRING(100), allowNull: false },
     description: DataTypes.TEXT,
     status: { type: DataTypes.STRING(20), defaultValue: 'active' },
     risk_level: {

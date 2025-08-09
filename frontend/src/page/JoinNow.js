@@ -207,7 +207,6 @@ const JoinForm = () => {
     }
 
     // 2. Kiểm tra số dư nếu đã đăng nhập
-    debugger
     if (isAuthenticated && estimatedPrice !== null && estimatedPrice > userCapital) {
 
       setError("⚠️ Số dư của bạn không đủ để thanh toán gói này.");

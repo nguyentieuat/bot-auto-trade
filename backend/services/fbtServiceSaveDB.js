@@ -61,7 +61,7 @@ async function upsertBotIfNeeded(botName) {
   if (checkBot.rowCount > 0) return checkBot.rows[0].id;
 
   const insertBot = await pool.query(
-    `INSERT INTO bots (name, name_display, created_at)
+    `INSERT INTO bots (name, name_org, created_at)
      VALUES ($1, $1, NOW()) RETURNING id`,
     [botName]
   );

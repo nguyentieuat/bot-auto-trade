@@ -46,7 +46,7 @@ export default function BotSalesChart() {
             <ResponsiveContainer width="100%" height={400}>
                 <BarChart data={data} barCategoryGap={20}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name_display" />
+                    <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
                     <Legend />

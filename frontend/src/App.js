@@ -14,6 +14,7 @@ import Footer from './page/Footer';
 import AdminTransactions from './page/admin/AdminTransactions';
 import InvestmentOrdersPage from './page/admin/InvestmentOrdersPage';
 import AdminDashboard from './page/admin/AdminDashboard';
+import BotDetailPage from './page/BotDetailPage';
 const backendUrl = process.env.REACT_APP_API_URL;
 
 const bgStyle = {
@@ -66,7 +67,7 @@ function App() {
           <Routes>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/*" element={<Home />} />
-            <Route path="/bots/:name" element={<Home />} />
+            <Route path="/bots/:name" element={<BotDetailPage />} />
             <Route path="/tham-gia" element={<JoinNow />} />
             <Route path="/login-register" element={<LoginRegister />} />
             <Route path="/profile" element={<Profile />} />

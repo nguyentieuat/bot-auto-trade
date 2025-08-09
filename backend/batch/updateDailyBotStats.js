@@ -2,12 +2,40 @@ const { readAllCSVFiles } = require('../services/fbtService');
 const path = require('path');
 const cron = require('node-cron');
 const pool = require('../db');
-const {truncateDecimal} = require('../utils/utils');
+const { truncateDecimal } = require('../utils/utils');
 
-function getBotIdFromFilename(filename) {
-  const name = path.basename(filename, '.csv');
-  const id = parseInt(name);
-  return isNaN(id) ? null : id;
+async function getOrInsertBotId(botName) {
+  const result = await pool.query('SELECT id FROM bots WHERE name_org = $1', [botName]);
+  if (result.rows.length > 0) return result.rows[0].id;
+
+  // Nếu chưa có thì insert
+  const insert = await pool.query(
+    `INSERT INTO bots (name, name_org, created_at)
+     VALUES ($1, $1, NOW()) RETURNING id`,
+    [botName]
+  );
+
+  return insert.rows[0].id;
+}
+
+async function saveDailyStats(botId, botName, rows) {
+  for (const row of rows) {
+    const date = new Date(row.Datetime).toISOString().split('T')[0];
+    const gain = truncateDecimal(row.gain || 0, 6);
+    const totalGain = truncateDecimal(row.total_gain || 0, 6);
+
+    try {
+      await pool.query(
+        `INSERT INTO daily_bot_stats (bot_id, date, gain, total_gain)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (bot_id, date) DO NOTHING`,
+        [botId, date, gain, totalGain]
+      );
+      console.log(`✅ Inserted bot ${botName} - ${date}: gain ${gain}, total_gain ${totalGain}`);
+    } catch (err) {
+      console.error(`❌ Failed insert for ${botName} on ${date}:`, err.message);
+    }
+  }
 }
 
 async function updateDailyBotStats() {
@@ -15,30 +43,12 @@ async function updateDailyBotStats() {
     const files = await readAllCSVFiles();
 
     for (const file of files) {
-      const botId = getBotIdFromFilename(file.filename);
-      if (!botId) {
-        console.warn(`⚠️ Skipping invalid filename: ${file.filename}`);
-        continue;
-      }
-
+      const botName = path.basename(file.filename, '.csv');
       const rows = file.data;
       if (!rows || rows.length === 0) continue;
 
-      for (const row of rows) {
-        const date = new Date(row.Datetime).toISOString().split('T')[0];
-        const gain = truncateDecimal(row.gain || 0, 6);
-        const totalGain = truncateDecimal(row.total_gain || 0, 6);
-
-        await pool.query(
-          `INSERT INTO daily_bot_stats (bot_id, date, gain, total_gain)
-           VALUES ($1, $2, $3, $4)
-          ON CONFLICT (bot_id, date) DO NOTHING;
-          `,
-          [botId, date, gain, totalGain]
-        );
-
-        console.log(`✅ Inserted bot ${botId} - date ${date}`);
-      }
+      const botId = await getOrInsertBotId(botName);
+      await saveDailyStats(botId, botName, rows);
     }
 
     console.log('✨ Batch completed.');
@@ -53,3 +63,7 @@ cron.schedule('0 0 * * *', async () => {
   console.log('⏰ Running daily update bot stats...');
   await updateDailyBotStats();
 });
+
+if (require.main === module) {
+  updateDailyBotStats();
+}

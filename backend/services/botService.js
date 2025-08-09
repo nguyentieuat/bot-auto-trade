@@ -4,7 +4,7 @@ const pool = require('../db');
 /**
  * Lấy danh sách tất cả bot 
  */
-async function getActiveBots () {
+async function getActiveBots() {
     return await Bot.findAll({
         where: { status: 'active' },
         order: [['created_at', 'DESC']],
@@ -51,11 +51,27 @@ async function getAllSubscriptionBot(botName) {
     return result.rows;
 }
 
-
+async function getBotWithStats(botName) {
+    const query = `
+    SELECT 
+        b.name,
+        b.description,
+        b.risk_level,
+        s.date,
+        s.gain,
+        s.total_gain
+      FROM bots b
+      JOIN daily_bot_stats s ON s.bot_id = b.id
+      WHERE b.name = $1
+      ORDER BY s.date ASC
+  `;
+    const result = await pool.query(query, [botName]);
+    return result.rows;
+}
 
 module.exports = {
     getActiveBots,
     getBotChannels,
-    getAllSubscriptionBot
-    // các hàm khác nếu có...
+    getAllSubscriptionBot,
+    getBotWithStats
 };

@@ -189,7 +189,6 @@ router.get('/api/admin/investment-orders', authenticateTokenAdmin, async (req, r
 });
 
 router.post('/api/admin/investment-orders/:id', authenticateTokenAdmin, async (req, res) => {
-    debugger
     const { id } = req.params;
     const { action } = req.body;
 
@@ -267,10 +266,10 @@ router.get('/api/admin/guest-join-requests', authenticateTokenAdmin, async (req,
         const requests = result.rows;
 
         // Lấy toàn bộ bots
-        const botResult = await pool.query(`SELECT id, name_display FROM bots`);
+        const botResult = await pool.query(`SELECT id, name FROM bots`);
         const botMap = {};
         botResult.rows.forEach(bot => {
-            botMap[bot.id] = bot.name_display;
+            botMap[bot.id] = bot.name;
         });
 
         // Gắn tên bot
@@ -300,12 +299,11 @@ router.get('/api/admin/analytics/bot-sales', authenticateTokenAdmin, async (req,
       SELECT 
         b.id,
         b.name,
-        b.name_display,
         COUNT(usb.id) AS subscriptions_count,
         COALESCE(SUM(usb.price), 0) AS total_revenue
       FROM bots b
       LEFT JOIN user_subscription_bots usb ON b.id = usb.bot_id
-      GROUP BY b.id, b.name, b.name_display
+      GROUP BY b.id, b.name
       ORDER BY total_revenue DESC
     `);
         res.json(result);

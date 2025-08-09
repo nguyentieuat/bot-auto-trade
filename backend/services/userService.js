@@ -170,7 +170,6 @@ async function getUserBotSubcribedGains(username) {
                                         SELECT
                                             b.id AS bot_id,
                                             b.name,
-                                            b.name_display,
                                             us.start_date
                                         FROM user_subscriptions us
                                         JOIN user_subscription_bots usb ON us.id = usb.subscription_id
@@ -213,7 +212,6 @@ async function getUserBotSubcribedGains(username) {
     const result = bots.map(bot => ({
         bot_id: bot.bot_id,
         name: bot.name,
-        name_display: bot.name_display,
         start_date: bot.start_date,
         daily_stats: statsMap[bot.bot_id] || [],
     }));
