@@ -54,7 +54,10 @@ const DepositHistory = ({ username, reloadTrigger }) => {
           ⚠️ Hiện chưa có giao dịch nạp tiền nào.
         </div>
       ) : (
-        <div className="table-responsive mt-3">
+        <div
+          className="table-responsive mt-3"
+          style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}
+        >
           <table className="table table-striped table-hover align-middle text-center">
             <thead className="table-light">
               <tr>

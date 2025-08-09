@@ -4,7 +4,7 @@ import WithdrawalHistory from './WithdrawalHistory';
 
 const backendUrl = process.env.REACT_APP_API_URL;
 
-const Withdraw = ({ user }) => {
+const Withdraw = ({ user, sidebarOpen }) => {
   const [amount, setAmount] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,53 +43,53 @@ const Withdraw = ({ user }) => {
   };
 
   return (
-    <>
-      <div className="container mt-5">
-        <div className="card shadow-sm p-4">
-          <h3 className="mb-3 text-warning">
-            🏦 Yêu cầu rút tiền
-          </h3>
+    <div className="container-fluid mt-4" style={{
+      marginLeft: sidebarOpen && window.innerWidth >= 768 ? 260 : 0,
+      transition: 'margin-left 0.3s ease',
+    }}>
+      <div className="card shadow-sm p-4">
+        <h3 className="mb-3 text-warning">
+          🏦 Yêu cầu rút tiền
+        </h3>
 
-          <form onSubmit={handleWithdraw}>
-            <div className="mb-3">
-              <label htmlFor="amount" className="form-label fw-medium">
-                Nhập số tiền muốn rút:
-              </label>
-              <input
-                type="number"
-                id="amount"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="Ví dụ: 100000"
-                className="form-control"
-                min={0}
-                disabled={loading}
-                required
-              />
-            </div>
+        <form onSubmit={handleWithdraw}>
+          <div className="mb-3">
+            <label htmlFor="amount" className="form-label fw-medium">
+              Nhập số tiền muốn rút:
+            </label>
+            <input
+              type="number"
+              id="amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Ví dụ: 100000"
+              className="form-control"
+              min={0}
+              disabled={loading}
+              required
+            />
+          </div>
 
-            <button
-              type="submit"
-              className="btn btn-warning w-100"
-              disabled={loading || !amount}
-            >
-              {loading ? 'Đang xử lý...' : 'Gửi yêu cầu rút tiền'}
-            </button>
-          </form>
+          <button
+            type="submit"
+            className="btn btn-warning w-100"
+            disabled={loading || !amount}
+          >
+            {loading ? 'Đang xử lý...' : 'Gửi yêu cầu rút tiền'}
+          </button>
+        </form>
 
-          {message && (
-            <div
-              className={`alert mt-3 ${statusCode >= 400 ? 'alert-danger' : 'alert-success'}`}
-              role="alert"
-            >
-              {message}
-            </div>
-          )}
-        </div>
+        {message && (
+          <div
+            className={`alert mt-3 ${statusCode >= 400 ? 'alert-danger' : 'alert-success'}`}
+            role="alert"
+          >
+            {message}
+          </div>
+        )}
       </div>
-
       <WithdrawalHistory username={user.username} reloadTrigger={reloadTrigger} />
-    </>
+    </div>
   );
 };
 

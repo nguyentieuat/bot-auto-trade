@@ -115,3 +115,9 @@ body::before {
   font-size: 14px;
   color: #555;           /* Màu chữ */
 }
+
+/* Giới hạn overflow cho tất cả các biểu đồ */
+.gain-chart-container {
+  width: 100%;
+  overflow-x: hidden;
+}

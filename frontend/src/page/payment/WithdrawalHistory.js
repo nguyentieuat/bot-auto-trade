@@ -49,7 +49,7 @@ const WithdrawalHistory = ({ username, reloadTrigger }) => {
       )}
 
       {!loading && !error && withdrawals.length > 0 && (
-        <div className="table-responsive">
+        <div className="table-responsive mt-3" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <table className="table table-striped table-hover mt-3">
             <thead className="table-light">
               <tr>

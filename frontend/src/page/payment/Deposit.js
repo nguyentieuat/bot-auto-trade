@@ -4,7 +4,7 @@ import DepositHistory from './DepositHistory';
 
 const backendUrl = process.env.REACT_APP_API_URL;
 
-const Deposit = ({ user }) => {
+const Deposit = ({ user, sidebarOpen }) => {
     const [amount, setAmount] = useState('');
     const [bankInfo, setBankInfo] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,7 +59,10 @@ const Deposit = ({ user }) => {
     };
 
     return (
-        <div className="container mt-4">
+        <div className="container-fluid mt-4" style={{
+            marginLeft: sidebarOpen && window.innerWidth >= 768 ? 260 : 0,
+            transition: 'margin-left 0.3s ease',
+        }}>
             <h2 className="mb-4">💰 Nạp tiền</h2>
 
             <form onSubmit={handleSubmit} className="mb-3">

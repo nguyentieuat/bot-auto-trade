@@ -277,7 +277,7 @@ const BotDetail = ({ bot, onBack }) => {
                 <p>Vui lòng đăng ký hoặc đăng nhập để sử dụng chức năng này.</p>
               </div>
               <div className="modal-footer">
-                <a href="/login" className="btn btn-primary">Đăng nhập</a>
+                <a href="/login-register" className="btn btn-primary">Đăng nhập</a>
                 <button className="btn btn-secondary" onClick={() => setShowLoginModal(false)}>Hủy</button>
               </div>
             </div>

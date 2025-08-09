@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const backendUrl = process.env.REACT_APP_API_URL;
 
-const AccountManagement = ({ user }) => {
+const AccountManagement = ({ user, sidebarOpen }) => {
   const [userProfile, setUserProfile] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
 
@@ -153,7 +153,10 @@ const AccountManagement = ({ user }) => {
   };
 
   return (
-    <div>
+    <div className="container-fluid mt-4" style={{
+      marginLeft: sidebarOpen && window.innerWidth >= 768 ? 260 : 0,
+      transition: 'margin-left 0.3s ease',
+    }}>
       <h2 className="mb-4">Quản Lý Tài Khoản</h2>
 
       {/* Thông tin cơ bản */}

@@ -6,7 +6,7 @@ import GainChart from "../bot_chart/GainChart";
 
 const backendUrl = process.env.REACT_APP_API_URL;
 
-const DashboardInvestSection = ({ user }) => {
+const DashboardInvestSection = ({ user, sidebarOpen }) => {
   const [investmentSummary, setInvestmentSummary] = useState([]);
   const [userProfits, setUserProfits] = useState([]);
   const [investments, setInvestments] = useState([]);
@@ -18,48 +18,48 @@ const DashboardInvestSection = ({ user }) => {
   const token = localStorage.getItem('token');
 
   const fetchData = async () => {
-  setLoading(true);
-  setError(null);
+    setLoading(true);
+    setError(null);
 
-  try {
-    const [investmentsRes, summaryRes, profitsRes] = await Promise.allSettled([
-      fetch(`${backendUrl}/api/investment-orders/${username}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      }),
-      fetch(`${backendUrl}/api/investment-summary/${username}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      }),
-      fetch(`${backendUrl}/api/user-profits/${username}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      }),
-    ]);
+    try {
+      const [investmentsRes, summaryRes, profitsRes] = await Promise.allSettled([
+        fetch(`${backendUrl}/api/investment-orders/${username}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        fetch(`${backendUrl}/api/investment-summary/${username}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        fetch(`${backendUrl}/api/user-profits/${username}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+      ]);
 
-    // Xử lý kết quả từng API
-    if (investmentsRes.status === "fulfilled" && investmentsRes.value.ok) {
-      setInvestments(await investmentsRes.value.json());
-    } else {
-      console.warn("Lỗi lấy danh sách đầu tư");
+      // Xử lý kết quả từng API
+      if (investmentsRes.status === "fulfilled" && investmentsRes.value.ok) {
+        setInvestments(await investmentsRes.value.json());
+      } else {
+        console.warn("Lỗi lấy danh sách đầu tư");
+      }
+
+      if (summaryRes.status === "fulfilled" && summaryRes.value.ok) {
+        setInvestmentSummary(await summaryRes.value.json());
+      } else {
+        console.warn("Lỗi lấy tóm tắt đầu tư");
+      }
+
+      if (profitsRes.status === "fulfilled" && profitsRes.value.ok) {
+        const data = await profitsRes.value.json();
+        setUserProfits(data.data || []);
+      } else {
+        console.warn("Lỗi lấy lợi nhuận người dùng");
+      }
+    } catch (err) {
+      console.error("Lỗi fetch dữ liệu:", err);
+      setError("Không thể tải dữ liệu. Vui lòng thử lại sau.");
+    } finally {
+      setLoading(false);
     }
-
-    if (summaryRes.status === "fulfilled" && summaryRes.value.ok) {
-      setInvestmentSummary(await summaryRes.value.json());
-    } else {
-      console.warn("Lỗi lấy tóm tắt đầu tư");
-    }
-
-    if (profitsRes.status === "fulfilled" && profitsRes.value.ok) {
-      const data = await profitsRes.value.json();
-      setUserProfits(data.data || []);
-    } else {
-      console.warn("Lỗi lấy lợi nhuận người dùng");
-    }
-  } catch (err) {
-    console.error("Lỗi fetch dữ liệu:", err);
-    setError("Không thể tải dữ liệu. Vui lòng thử lại sau.");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   useEffect(() => {
     if (!username) return;
@@ -68,7 +68,10 @@ const DashboardInvestSection = ({ user }) => {
 
   if (loading) {
     return (
-      <div className="text-center my-5">
+      <div className="text-center my-5" style={{
+        marginLeft:
+          window.innerWidth >= 768 ? 260 : (sidebarOpen ? 260 : 0)
+      }}>
         <div className="spinner-border text-primary" role="status"></div>
         <p className="mt-3 text-muted">Đang tải dữ liệu đầu tư...</p>
       </div>
@@ -77,37 +80,38 @@ const DashboardInvestSection = ({ user }) => {
 
   if (error) {
     return (
-      <div className="alert alert-danger mt-4" role="alert">
+      <div className="alert alert-danger mt-4" role="alert" style={{
+        marginLeft:
+          window.innerWidth >= 768 ? 260 : (sidebarOpen ? 260 : 0)
+      }}>
         {error}
       </div>
     );
   }
 
   return (
-    <div className="container mt-4">
-      <h4 className="mb-3 text-primary text-start w-100">Phân Bổ Vốn Theo Trạng Thái</h4>
-
-      <div className="row">
-        {/* Chart - 60% width */}
-        <div className="col-md-7">
-          <CapitalDistributionChart investmentSummary={investmentSummary} />
-          <p className="text-muted mt-2">Đơn vị: triệu đồng</p>
-        </div>
-
-        {/* Form - 40% width */}
-        <div className="col-md-5">
-          <DashboardInvestForm
-            username={user.username}
-            onSuccess={(newData) => {
-              setInvestments((prev) => [newData, ...prev]);
-              fetchData(); // refresh lại dữ liệu khi thêm mới
-            }}
-          />
-        </div>
+    <div  style={{
+      marginLeft: sidebarOpen && window.innerWidth >= 768 ? 260 : 0,
+      transition: 'margin-left 0.3s ease',
+    }}>
+      <div className="mb-5">
+        <h4 className="text-warning">Phân Bổ Vốn Theo Trạng Thái</h4>
+        <CapitalDistributionChart investmentSummary={investmentSummary} />
+        <p className="text-muted mt-2">Đơn vị: triệu đồng</p>
       </div>
 
-      <div className="row mt-5">
-        <h4 className="text-info mb-3">Biểu đồ tăng trưởng</h4>
+      <div className="mb-5">
+        <DashboardInvestForm
+          username={user.username}
+          onSuccess={(newData) => {
+            setInvestments((prev) => [newData, ...prev]);
+            fetchData(); // refresh lại dữ liệu khi thêm mới
+          }}
+        />
+      </div>
+
+      <div className="mb-5">
+        <h4 className="text-warning">Biểu đồ tăng trưởng</h4>
         <GainChart data={userProfits} mode={
           userProfits.length >= 1000
             ? 'year'
@@ -117,12 +121,15 @@ const DashboardInvestSection = ({ user }) => {
         } />
       </div>
 
-      <h5 className="text-primary mt-5 text-start w-100">Lịch Sử Đầu Tư</h5>
-      {investments.length > 0 ? (
-        <BotInvestmentHistoryTable investments={investments} />
-      ) : (
-        <p className="text-muted">Không có lịch sử đầu tư.</p>
-      )}
+      <div className="mb-5">
+        <h4 className="text-warning">Lịch Sử Đầu Tư</h4>
+        {investments.length > 0 ? (
+          <BotInvestmentHistoryTable investments={investments} />
+        ) : (
+          <p className="text-muted">Không có lịch sử đầu tư.</p>
+        )}
+      </div>
+
     </div>
   );
 };

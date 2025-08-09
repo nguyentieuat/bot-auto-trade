@@ -2,7 +2,7 @@ import React from "react";
 
 const BotInvestmentHistoryTable = ({ investments }) => {
   return (
-    <div className="card p-3 shadow-sm">
+    <div className="card p-3 shadow-sm table-responsive" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }} >
       <table className="table table-bordered table-hover">
         <thead>
           <tr>
