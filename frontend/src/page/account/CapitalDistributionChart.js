@@ -41,7 +41,7 @@ const CapitalDistributionChart = ({ investmentSummary }) => {
           ))}
         </Pie>
         <Tooltip
-          formatter={(value, name) => [`${value.toLocaleString()} triệu`, name]}
+          formatter={(value, name) => [`${value.toLocaleString()}`, name]}
         />
         <Legend />
       </PieChart>

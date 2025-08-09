@@ -34,6 +34,8 @@ async function saveDailySystemStats(rows) {
         `,
         [date, truncateDecimal(gain, 6), truncateDecimal(total_gain, 6)]
       );
+
+       console.log(`✅ Inserted system stats ${date}: gain ${gain}, total_gain ${total_gain}`);
     }
 
     await client.query('COMMIT');

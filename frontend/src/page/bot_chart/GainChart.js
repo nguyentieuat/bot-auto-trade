@@ -70,7 +70,7 @@ const GainChart = ({ data, mode = 'day' }) => {
         <XAxis dataKey="displayDate" />
         <YAxis />
         <Tooltip
-          formatter={(value, name) => [`${value.toFixed(2)} USD`, name]}
+          formatter={(value, name) => [`${value.toFixed(2)}`, name]}
         />
         <Legend />
         {chartKeys.map((key, index) => (
