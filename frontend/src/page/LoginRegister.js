@@ -1,37 +1,42 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import PrivacyPolicyAndTerms from './PrivacyPolicyAndTerms'; // import page
 
 const LoginRegister = () => {
     const API_URL = process.env.REACT_APP_API_URL;
     const navigate = useNavigate();
 
     const [isLogin, setIsLogin] = useState(true);
-    const [form, setForm] = useState({ username: '', password: '', email: '', phone: '' });
+    const [form, setForm] = useState({ username: '', password: '', email: '', phone: '', agree: false });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
+    const [showPolicy, setShowPolicy] = useState(false); // modal state
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
-        setErrors((prev) => ({ ...prev, [name]: '' })); // clear error while typing
+        const { name, value, type, checked } = e.target;
+        setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+        setErrors((prev) => ({ ...prev, [name]: '' }));
     };
 
     const validateForm = () => {
         const newErrors = {};
-        const { username, password, email, phone } = form;
+        const { username, password, email, phone, agree } = form;
+        const emailRegexStrict = /^(?!\.)(?!.*\.\.)[a-zA-Z0-9._%+-]+(?<!\.)@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
         if (!username.trim()) newErrors.username = 'Trường này là bắt buộc.';
         if (!password.trim()) newErrors.password = 'Trường này là bắt buộc.';
 
         if (!isLogin) {
             if (!email.trim()) newErrors.email = 'Email là bắt buộc.';
-            else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+            else if (!emailRegexStrict.test(email))
                 newErrors.email = 'Email không hợp lệ.';
 
             if (!phone.trim()) newErrors.phone = 'Số điện thoại là bắt buộc.';
             else if (!/^[0-9]{9,15}$/.test(phone))
                 newErrors.phone = 'Số điện thoại không hợp lệ.';
+
+            if (!agree) newErrors.agree = 'Bạn cần đồng ý với chính sách để tiếp tục.';
         }
 
         setErrors(newErrors);
@@ -47,7 +52,7 @@ const LoginRegister = () => {
             const url = isLogin ? `${API_URL}/api/login` : `${API_URL}/api/register`;
             const body = isLogin
                 ? { account: form.username, password: form.password }
-                : form;
+                : { username: form.username, password: form.password, email: form.email, phone: form.phone };
 
             const res = await axios.post(url, body);
 
@@ -58,7 +63,7 @@ const LoginRegister = () => {
             } else {
                 alert('Đăng ký thành công! Vui lòng đăng nhập.');
                 setIsLogin(true);
-                setForm({ username: '', password: '', email: '', phone: '' });
+                setForm({ username: '', password: '', email: '', phone: '', agree: false });
             }
         } catch (err) {
             const message = err.response?.data?.message || 'Có lỗi xảy ra';
@@ -121,6 +126,33 @@ const LoginRegister = () => {
                 />
                 {errors.password && <div className="invalid-feedback d-block">{errors.password}</div>}
 
+                {/* Checkbox Đồng ý Chính sách */}
+                {!isLogin && (
+                    <div className="form-check mt-2">
+                        <input
+                            className={`form-check-input ${errors.agree ? 'is-invalid' : ''}`}
+                            type="checkbox"
+                            id="agree"
+                            name="agree"
+                            checked={form.agree}
+                            onChange={handleChange}
+                            disabled={loading}
+                        />
+                        <label className="form-check-label text-light" htmlFor="agree">
+                            Tôi đồng ý với{' '}
+                            <button
+                                type="button"
+                                className="btn btn-link p-0"
+                                style={{ color: '#0dcaf0' }}
+                                onClick={() => setShowPolicy(true)}
+                            >
+                                Chính sách & Quyền riêng tư
+                            </button>
+                        </label>
+                        {errors.agree && <div className="invalid-feedback d-block">{errors.agree}</div>}
+                    </div>
+                )}
+
                 <button
                     className="btn btn-info w-100 rounded-pill mt-3 d-flex justify-content-center align-items-center"
                     type="submit"
@@ -141,12 +173,32 @@ const LoginRegister = () => {
                     onClick={() => {
                         setIsLogin(!isLogin);
                         setErrors({});
-                        setForm({ username: '', password: '', email: '', phone: '' });
+                        setForm({ username: '', password: '', email: '', phone: '', agree: false });
                     }}
                 >
                     {isLogin ? 'Chưa có tài khoản? Đăng ký' : 'Đã có tài khoản? Đăng nhập'}
                 </button>
             </div>
+
+            {/* Modal Chính sách */}
+            {showPolicy && (
+                <div className="modal fade show" style={{ display: 'block', background: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Chính sách & Quyền riêng tư</h5>
+                                <button type="button" className="btn-close" onClick={() => setShowPolicy(false)}></button>
+                            </div>
+                            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+                                <PrivacyPolicyAndTerms onClose={() => setShowPolicy(false)}/>
+                            </div>
+                            <div className="modal-footer">
+                                <button className="btn btn-secondary" onClick={() => setShowPolicy(false)}>Đóng</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
