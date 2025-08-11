@@ -232,7 +232,7 @@ function Home() {
             </div>
           </div>
 
-          {(restoring || modeChanging) && (
+          {(loading || restoring || modeChanging) && (
             <div className="overlay-loading">
               <div className="spinner-border text-light" role="status">
                 <span className="visually-hidden">Loading...</span>

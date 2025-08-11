@@ -9,7 +9,6 @@ const AccountManagement = ({ user, sidebarOpen }) => {
   const [formData, setFormData] = useState({
     bank: '',
     accountNumber: '',
-    telegramID: '',
     address: '',
   });
 
@@ -28,7 +27,6 @@ const AccountManagement = ({ user, sidebarOpen }) => {
       setFormData({
         bank: userProfile.bank || '',
         accountNumber: userProfile.bank_account || '',
-        telegramID: userProfile.telegram_id || '',
         address: userProfile.address || '',
       });
     }
@@ -101,7 +99,6 @@ const AccountManagement = ({ user, sidebarOpen }) => {
       setFormData({
         bank: userProfile.bank || '',
         accountNumber: userProfile.bank_account || '',
-        telegramID: userProfile.telegram_id || '',
         address: userProfile.address || '',
       });
     }
@@ -181,13 +178,12 @@ const AccountManagement = ({ user, sidebarOpen }) => {
           </div>
 
           <div className="col-md-6">
-            {['bank', 'accountNumber', 'telegramID', 'address'].map((field, idx) => (
+            {['bank', 'accountNumber', 'address'].map((field, idx) => (
               <div className="mb-3" key={field}>
                 <label className="form-label fw-bold">
                   {{
                     bank: 'Ngân Hàng',
                     accountNumber: 'STK',
-                    telegramID: 'Tele ID',
                     address: 'Địa chỉ',
                   }[field]}
                 </label>
