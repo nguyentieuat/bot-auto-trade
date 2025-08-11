@@ -6,6 +6,16 @@ const bucket = 'smooth-bucket-s3';
 const prefix = 'sys_and_vn30_pnl/';
 
 async function saveDailySystemAndVN30Stats(rows) {
+
+  // 1. Kiểm tra vốn trong system_total_capital 
+  const capitalRes = await pool.query(
+    `SELECT current_amount 
+       FROM system_total_capital 
+       LIMIT 1`
+  );
+
+  const currentCapital = capitalRes.rows[0]?.current_amount || 0;
+
   // Gom nhóm dữ liệu theo date
   const dailyStats = {};
 
@@ -18,7 +28,10 @@ async function saveDailySystemAndVN30Stats(rows) {
       dailyStats[date] = { gain: 0, gainVn30: 0 };
     }
 
-    dailyStats[date].gain += gain;
+   // Chỉ cộng gain, total_gain khi có vốn
+    if (currentCapital > 0) {
+      dailyStats[date].gain += gain;
+    }
     dailyStats[date].gainVn30 += gainVn30;
   }
 
@@ -41,15 +54,19 @@ async function saveDailySystemAndVN30Stats(rows) {
     await client.query('BEGIN');
 
     for (const [date, { gain, total_gain, gainVn30, total_gain_vn30 }] of Object.entries(dailyStats)) {
-      await client.query(
-        `
+      if (currentCapital > 0) {
+        await client.query(
+          `
         INSERT INTO system_daily_stats (date, gain, total_gain)
         VALUES ($1, $2, $3)
         ON CONFLICT (date) DO NOTHING
         `,
-        [date, gain, total_gain]
-      );
-
+          [date, gain, total_gain]
+        );
+        console.log(`✅ Inserted system stats ${date}: gain ${gain}, total_gain ${total_gain}`);
+      } else {
+        console.log(`⛔ Skip system stats for ${date} because current_amount = ${currentCapital}`);
+      }
       await client.query(
         `
         INSERT INTO vn30_daily_stats (date, gain, total_gain)
@@ -106,8 +123,8 @@ async function updateDailySystemAndVN30Stats() {
 
 }
 
-// Chạy hàng ngày lúc 1:10 sáng
-cron.schedule('10 1 * * *', updateDailySystemAndVN30Stats);
+// Chạy hàng ngày lúc 0:45 sáng
+cron.schedule('45 0 * * *', updateDailySystemAndVN30Stats);
 
 // Cho chạy tay nếu cần
 if (require.main === module) updateDailySystemAndVN30Stats();

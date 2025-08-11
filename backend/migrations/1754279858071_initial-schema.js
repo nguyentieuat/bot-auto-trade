@@ -10,7 +10,7 @@ exports.up = (pgm) => {
     phone: { type: 'varchar(20)', notNull: true, unique: true },
     password: { type: 'text', notNull: true },
     is_admin: { type: 'boolean', default: false },
-    created_at: { type: 'timestamp', default: pgm.func('now()') },
+    created_at: { type: 'timestamp', default: pgm.func('current_timestamp') },
   });
 
   // === USER PROFILES (Thông tin mở rộng) ===
@@ -37,7 +37,7 @@ exports.up = (pgm) => {
     description: { type: 'text' },
     status: { type: 'varchar(20)', default: 'active' },
     risk_level: { type: 'int', default: 1, check: 'risk_level >= 1 AND risk_level <= 5' },
-    created_at: { type: 'timestamp', default: pgm.func('now()') },
+    created_at: { type: 'timestamp', default: pgm.func('current_timestamp') },
   });
 
   // === Kênh tín hiệu của bot ===
@@ -100,7 +100,7 @@ exports.up = (pgm) => {
     id: 'id',
     user_id: { type: 'int', notNull: true, references: 'users', onDelete: 'cascade' },
     capital_amount: { type: 'numeric(23, 3)', notNull: true },
-    created_at: { type: 'timestamp', default: pgm.func('now()') },
+    created_at: { type: 'timestamp', default: pgm.func('current_timestamp') },
     start_at: { type: 'timestamp' },
     confirmed_at: { type: 'timestamp' },
     end_date: { type: 'timestamp' },
@@ -142,7 +142,7 @@ exports.up = (pgm) => {
     id: 'id',
     user_id: { type: 'int', notNull: true, references: 'users', onDelete: 'cascade' },
     amount: { type: 'numeric(22, 2)', notNull: true },
-    requested_at: { type: 'timestamp', notNull: true, default: pgm.func('now()') },
+    requested_at: { type: 'timestamp', notNull: true, default: pgm.func('current_timestamp') },
     confirmed_at: { type: 'timestamp' },
     status: { type: 'varchar(20)', default: 'pending' },
     method: { type: 'varchar(50)', default: 'bank_transfer' },
@@ -170,12 +170,13 @@ exports.up = (pgm) => {
     duration_months: { type: 'int', notNull: true },
     selected_bot_ids: { type: 'jsonb', notNull: true }, // lưu mảng ID bot
     note: { type: 'text' },
-    submitted_at: { type: 'timestamp', default: pgm.func('now()') },
+    submitted_at: { type: 'timestamp', default: pgm.func('current_timestamp') },
   });
 
   pgm.createTable('system_total_capital', {
     id: 'id',
     current_amount: { type: 'numeric', notNull: true, default: 0 },
+    created_at: { type: 'timestamp', default: pgm.func('current_timestamp') },
     updated_at: { type: 'timestamp', notNull: true, default: pgm.func('current_timestamp') },
   });
 

@@ -73,8 +73,8 @@ async function updateDailyUserProfits() {
   }
 }
 
-// Chạy hàng ngày lúc 1:00 sáng
-cron.schedule('0 1 * * *', updateDailyUserProfits);
+// Chạy hàng ngày lúc 1:10 sáng
+cron.schedule('10 1 * * *', updateDailyUserProfits);
 
 // Cho chạy tay nếu cần
 if (require.main === module) updateDailyUserProfits();
