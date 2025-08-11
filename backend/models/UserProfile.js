@@ -6,7 +6,6 @@ module.exports = (sequelize, DataTypes) => {
     note: DataTypes.TEXT,
     bank: DataTypes.STRING(100),
     bank_account: DataTypes.STRING(100),
-    telegram_id: DataTypes.STRING(50),
     total_capital: { type: DataTypes.DECIMAL(26, 3) },
   }, {
     tableName: 'user_profiles',

@@ -1,7 +1,9 @@
 const path = require('path');
 const cron = require('node-cron');
 const pool = require('../db');
-const { truncateDecimal, readAllCSVFiles } = require('../utils/utils');
+const { truncateDecimal, readAllCSVFilesFromS3 } = require('../utils/utils');
+const bucket = 'smooth-bucket-s3';
+const prefix = 'daily_pnl/';
 
 async function getOrInsertBotId(botName) {
   const result = await pool.query('SELECT id FROM bots WHERE name_org = $1', [botName]);
@@ -39,8 +41,7 @@ async function saveDailyStats(botId, botName, rows) {
 
 async function updateDailyBotStats() {
   try {
-    const dataDir = path.join(__dirname, '..', 'data', 'FBT');
-    const files = await readAllCSVFiles(dataDir);
+    const files = await readAllCSVFilesFromS3(bucket, prefix);
 
     for (const file of files) {
       const botName = path.basename(file.filename, '.csv');

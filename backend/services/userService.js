@@ -191,9 +191,10 @@ async function getUserBotSubcribedGains(username) {
                                         WITH bot_start_dates(bot_id, start_date) AS (
                                             VALUES ${valuesList}
                                         )
-                                        SELECT s.bot_id, s.date, s.gain
+                                        SELECT s.bot_id, s.date, s.gain AS bot_gain, v.gain AS vn30_gain
                                         FROM daily_bot_stats s
                                         JOIN bot_start_dates bsd ON s.bot_id = bsd.bot_id
+                                        LEFT JOIN vn30_daily_stats v ON s.date = v.date
                                         WHERE s.date >= bsd.start_date
                                         ORDER BY s.bot_id, s.date
                                         `, valuesParams);
@@ -204,7 +205,8 @@ async function getUserBotSubcribedGains(username) {
         if (!statsMap[row.bot_id]) statsMap[row.bot_id] = [];
         statsMap[row.bot_id].push({
             date: row.date,
-            gain: parseFloat(row.gain),
+            gainBot: parseFloat(row.bot_gain),
+            gainVN30: parseFloat(row.vn30_gain),
         });
     }
 

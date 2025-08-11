@@ -1,6 +1,7 @@
 const fs = require('fs');
 const csv = require('csv-parser');
 const path = require('path');
+const AWS = require('aws-sdk');
 
 function truncateDecimal(number, digits) {
   const factor = Math.pow(10, digits);
@@ -58,7 +59,63 @@ async function readAllCSVFiles(dataDir) {
   });
 }
 
+AWS.config.update({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+});
+
+const s3 = new AWS.S3();
+
+async function readAllCSVFilesFromS3(bucket, prefix) {
+  // 1. List all CSV files in S3 prefix
+  const listParams = {
+    Bucket: bucket,
+    Prefix: prefix,
+  };
+  const listResponse = await s3.listObjectsV2(listParams).promise();
+  const csvFiles = (listResponse.Contents || [])
+    .map(obj => obj.Key)
+    .filter(key => key.endsWith('.csv'));
+
+  if (csvFiles.length === 0) return [];
+
+  // 2. Đọc và parse từng file CSV
+  const results = [];
+
+  for (const key of csvFiles) {
+    const rows = [];
+
+    // Lấy stream từ S3 file
+    const s3Stream = s3.getObject({ Bucket: bucket, Key: key }).createReadStream();
+
+    // Đọc file CSV từ stream
+    await new Promise((resolve, reject) => {
+      s3Stream
+        .pipe(csv())
+        .on('data', (data) => rows.push(data))
+        .on('end', () => {
+          // Chuẩn hóa key Datetime
+          const normalizedRows = rows.map(row => {
+            const keys = Object.keys(row);
+            const dateKey = keys.find(k => k.toLowerCase().includes('date'));
+            if (dateKey && dateKey !== 'Datetime') {
+              row['Datetime'] = row[dateKey];
+              delete row[dateKey];
+            }
+            return row;
+          });
+
+          results.push({ filename: key, data: normalizedRows });
+          resolve();
+        })
+        .on('error', reject);
+    });
+  }
+  return results;
+}
+
 module.exports = {
   truncateDecimal,
-  readAllCSVFiles
+  readAllCSVFiles,
+  readAllCSVFilesFromS3
 };

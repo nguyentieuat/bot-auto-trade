@@ -26,7 +26,6 @@ exports.up = (pgm) => {
     note: { type: 'text' },
     bank: { type: 'varchar(100)' },
     bank_account: { type: 'varchar(100)' },
-    telegram_id: { type: 'varchar(50)' },
     total_capital: { type: 'numeric(26, 3)' },
   });
 

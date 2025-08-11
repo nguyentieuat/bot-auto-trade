@@ -9,7 +9,8 @@ const adminRouter = require('./auth/adminRouter');
 const authenticateToken = require('./auth/authMiddleware');
 const { getPackages, getTimeDiscounts, guestJoin, caculatePrice, confirmSubscription, subscribeBot } = require('./controllers/packageController');
 
-require('./batch/updateDailyBotStats');
+require('./batch/updateDailyBotStatsS3');
+require('./batch/updateDailyBotStatsS3');
 require('./batch/dailyUserProfits');
 
 

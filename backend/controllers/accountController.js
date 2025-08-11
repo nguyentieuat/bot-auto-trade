@@ -6,7 +6,7 @@ const userService = require('../services/userService');
 
 exports.updateUserInfoByUsername = async (req, res) => {
     const { username } = req.params;
-    const { bank, accountNumber, telegramID, address } = req.body;
+    const { bank, accountNumber, address } = req.body;
     if (!username) {
         return res.status(400).json({ message: "Thiếu dữ liệu đầu vào" });
     }
@@ -23,13 +23,11 @@ exports.updateUserInfoByUsername = async (req, res) => {
                 user_id: user.id,
                 bank: bank,
                 bank_account: accountNumber,
-                telegram_id: telegramID,
                 address: address
             });
         } else {
             user.UserProfile.bank = bank;
             user.UserProfile.bank_account = accountNumber;
-            user.UserProfile.telegram_id = telegramID;
             user.UserProfile.address = address;
             await user.UserProfile.save();
         }
