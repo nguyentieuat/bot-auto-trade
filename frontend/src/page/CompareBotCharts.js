@@ -283,7 +283,8 @@ const CompareBotCharts = () => {
                                         <Tooltip labelFormatter={(label) => {
                                             const date = new Date(label);
                                             return date.toLocaleDateString();
-                                        }} />
+
+                                        }} wrapperStyle={{ color: '#000' }} />
                                         <Legend />
                                         <Line
                                             type="monotone"
