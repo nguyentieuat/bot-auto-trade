@@ -280,7 +280,10 @@ const CompareBotCharts = () => {
                                             ticks={getYearStartDates(chartData())}
                                         />
                                         <YAxis />
-                                        <Tooltip />
+                                        <Tooltip labelFormatter={(label) => {
+                                            const date = new Date(label);
+                                            return date.toLocaleDateString();
+                                        }} />
                                         <Legend />
                                         <Line
                                             type="monotone"
