@@ -14,7 +14,7 @@ const BotDetailPage = () => {
     useEffect(() => {
         const fetchBot = async () => {
             try {
-                const res = await axios.get(`${backendUrl}/api/bots/${name}`);
+                const res = await axios.get(`${backendUrl}/bots/${name}`);
                 const { bot } = res.data;
                 setBot(bot);
 

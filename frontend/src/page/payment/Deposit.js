@@ -17,7 +17,7 @@ const Deposit = ({ user, sidebarOpen }) => {
     useEffect(() => {
         const fetchBankInfo = async () => {
             try {
-                const res = await axios.get(`${backendUrl}/api/wallet/system-bank-info`, {
+                const res = await axios.get(`${backendUrl}/wallet/system-bank-info`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setBankInfo(res.data);
@@ -43,7 +43,7 @@ const Deposit = ({ user, sidebarOpen }) => {
         }
 
         try {
-            await axios.post(`${backendUrl}/api/deposit/${user.username}`, { amount }, {
+            await axios.post(`${backendUrl}/deposit/${user.username}`, { amount }, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 

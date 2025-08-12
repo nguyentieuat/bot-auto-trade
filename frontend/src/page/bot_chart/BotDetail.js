@@ -42,18 +42,18 @@ const BotDetail = ({ bot, onBack }) => {
 
       if (isAuth) {
         requests.push(
-          axios.get(`${backendUrl}/api/users/${user.username}/info`, {
+          axios.get(`${backendUrl}/users/${user.username}/info`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`${backendUrl}/api/subscriptions/${user.username}/${bot.name}`, {
+          axios.get(`${backendUrl}/subscriptions/${user.username}/${bot.name}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`${backendUrl}/api/subscription-bot-price/${bot.name}`)
+          axios.get(`${backendUrl}/subscription-bot-price/${bot.name}`)
         );
       }
 
       // Luôn luôn fetch link kênh bot
-      const botLinksReq = axios.get(`${backendUrl}/api/bot-chanel/${bot.name}`);
+      const botLinksReq = axios.get(`${backendUrl}/bot-chanel/${bot.name}`);
 
       try {
         const allResults = await Promise.allSettled([...requests, botLinksReq]);
@@ -133,7 +133,7 @@ const BotDetail = ({ bot, onBack }) => {
     try {
       setIsSubscribing(true);
       await axios.post(
-        `${backendUrl}/api/subscribe/${user.username}/${bot.name}`,
+        `${backendUrl}/subscribe/${user.username}/${bot.name}`,
         { months: selectedPkg.months, final_price: finalPrice },
         { headers: { Authorization: `Bearer ${token}` } }
       );

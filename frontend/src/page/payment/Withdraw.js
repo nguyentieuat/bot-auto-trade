@@ -19,7 +19,7 @@ const Withdraw = ({ user, sidebarOpen }) => {
     try {
       const token = localStorage.getItem('token');
       const res = await axios.post(
-        `${backendUrl}/api/withdraw/${user.username}`,
+        `${backendUrl}/withdraw/${user.username}`,
         { amount: parseFloat(amount) },
         {
           headers: {

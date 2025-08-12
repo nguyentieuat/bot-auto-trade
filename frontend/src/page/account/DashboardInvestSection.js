@@ -23,13 +23,13 @@ const DashboardInvestSection = ({ user, sidebarOpen }) => {
 
     try {
       const [investmentsRes, summaryRes, profitsRes] = await Promise.allSettled([
-        fetch(`${backendUrl}/api/investment-orders/${username}`, {
+        fetch(`${backendUrl}/investment-orders/${username}`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch(`${backendUrl}/api/investment-summary/${username}`, {
+        fetch(`${backendUrl}/investment-summary/${username}`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch(`${backendUrl}/api/user-profits/${username}`, {
+        fetch(`${backendUrl}/user-profits/${username}`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
       ]);

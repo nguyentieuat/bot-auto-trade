@@ -16,7 +16,7 @@ const DepositHistory = ({ username, reloadTrigger }) => {
 
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get(`${backendUrl}/api/deposit-history/${username}`, {
+        const res = await axios.get(`${backendUrl}/deposit-history/${username}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

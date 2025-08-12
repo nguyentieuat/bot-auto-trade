@@ -12,7 +12,7 @@ export default function PackageSalesChart() {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        fetch(`${backendUrl}/api/admin/analytics/package-sales`, {
+        fetch(`${backendUrl}/admin/analytics/package-sales`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },

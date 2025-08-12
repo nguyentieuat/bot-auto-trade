@@ -26,7 +26,7 @@ const Profile = () => {
       setLoading(true);
       setError(null);
 
-      const res = await fetch(`${backendUrl}/api/users/${user.username}/subscribed-bots/gains`, {
+      const res = await fetch(`${backendUrl}/users/${user.username}/subscribed-bots/gains`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

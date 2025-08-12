@@ -17,14 +17,27 @@ const AdminTransactions = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [depRes, witRes] = await Promise.all([
-                    axios.get(`${backendUrl}/api/admin/deposits`, { headers: { Authorization: `Bearer ${token}` } }),
-                    axios.get(`${backendUrl}/api/admin/withdrawals`, { headers: { Authorization: `Bearer ${token}` } })
+                const results = await Promise.allSettled([
+                    axios.get(`${backendUrl}/admin/deposits`, { headers: { Authorization: `Bearer ${token}` } }),
+                    axios.get(`${backendUrl}/admin/withdrawals`, { headers: { Authorization: `Bearer ${token}` } })
                 ]);
-                setDeposits(depRes.data);
-                setWithdrawals(witRes.data);
+
+                // Kiểm tra từng kết quả
+                if (results[0].status === 'fulfilled') {
+                    setDeposits(results[0].value.data);
+                } else {
+                    console.error('Lỗi lấy deposits:', results[0].reason);
+                    setDeposits([]); // hoặc xử lý fallback
+                }
+
+                if (results[1].status === 'fulfilled') {
+                    setWithdrawals(results[1].value.data);
+                } else {
+                    console.error('Lỗi lấy withdrawals:', results[1].reason);
+                    setWithdrawals([]); // hoặc xử lý fallback
+                }
             } catch (err) {
-                console.error('Lỗi lấy dữ liệu:', err);
+                console.error('Lỗi không mong muốn:', err);
             } finally {
                 setLoading(false);
             }
@@ -32,11 +45,12 @@ const AdminTransactions = () => {
         fetchData();
     }, [token]);
 
+
     const paginate = (data, page) => data.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
     const handleApprove = async (type, id) => {
         try {
-            await axios.post(`${backendUrl}/api/admin/${type}/${id}/approve`, {}, {
+            await axios.post(`${backendUrl}/admin/${type}/${id}/approve`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert('Phê duyệt thành công');
@@ -49,7 +63,7 @@ const AdminTransactions = () => {
 
     const handleReject = async (type, id) => {
         try {
-            await axios.post(`${backendUrl}/api/admin/${type}/${id}/reject`, {}, {
+            await axios.post(`${backendUrl}/admin/${type}/${id}/reject`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert('Từ chối thành công');
@@ -64,8 +78,8 @@ const AdminTransactions = () => {
         setLoading(true);
         try {
             const [depRes, witRes] = await Promise.all([
-                axios.get(`${backendUrl}/api/admin/deposits`, { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get(`${backendUrl}/api/admin/withdrawals`, { headers: { Authorization: `Bearer ${token}` } })
+                axios.get(`${backendUrl}/admin/deposits`, { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${backendUrl}/admin/withdrawals`, { headers: { Authorization: `Bearer ${token}` } })
             ]);
             setDeposits(depRes.data);
             setWithdrawals(witRes.data);

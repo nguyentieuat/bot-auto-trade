@@ -87,7 +87,7 @@ function Home() {
 
       // Fetch thêm từ API
       const offset = pageNumber * LIMIT;
-      const res = await axios.get(`${backendUrl}/api/fbt-data?limit=${LIMIT}&offset=${offset}`);
+      const res = await axios.get(`${backendUrl}/fbt-data?limit=${LIMIT}&offset=${offset}`);
       const botsObj = res.data.bots || {};
 
       const transformedBots = Object.entries(botsObj).map(([botName, data], index) => ({

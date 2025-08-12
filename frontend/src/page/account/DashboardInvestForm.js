@@ -18,7 +18,7 @@ const DashboardInvestForm = ({ username, onSuccess }) => {
 
     try {
       const res = await axios.post(
-        `${backendUrl}/api/investments`,
+        `${backendUrl}/investments`,
         {
           username: username,
           capital: parseFloat(capital),

@@ -38,10 +38,10 @@ const AccountManagement = ({ user, sidebarOpen }) => {
     const fetchData = async () => {
       try {
         const [infoRes, profileRes] = await Promise.all([
-          fetch(`${backendUrl}/api/users/${user.username}`, {
+          fetch(`${backendUrl}/users/${user.username}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch(`${backendUrl}/api/users/${user.username}/info`, {
+          fetch(`${backendUrl}/users/${user.username}/info`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -74,7 +74,7 @@ const AccountManagement = ({ user, sidebarOpen }) => {
 
   const handleSaveInfo = async () => {
     try {
-      const res = await fetch(`${backendUrl}/api/users/${user.username}/info`, {
+      const res = await fetch(`${backendUrl}/users/${user.username}/info`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ const AccountManagement = ({ user, sidebarOpen }) => {
     }
 
     try {
-      const res = await fetch(`${backendUrl}/api/users/${user.username}/change-password`, {
+      const res = await fetch(`${backendUrl}/users/${user.username}/change-password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

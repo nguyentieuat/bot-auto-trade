@@ -15,7 +15,7 @@ const WithdrawalHistory = ({ username, reloadTrigger }) => {
       setError('');
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`${backendUrl}/api/withdraw-history/${username}`, {
+        const response = await axios.get(`${backendUrl}/withdraw-history/${username}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

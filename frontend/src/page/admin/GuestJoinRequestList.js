@@ -14,7 +14,7 @@ const GuestJoinRequestList = () => {
         const fetchRequests = async () => {
             setLoading(true);
             try {
-                const res = await axios.get(`${backendUrl}/api/admin/guest-join-requests`, {
+                const res = await axios.get(`${backendUrl}/admin/guest-join-requests`, {
                     params: { page, limit },
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('token')}`,

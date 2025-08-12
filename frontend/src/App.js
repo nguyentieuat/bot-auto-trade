@@ -36,7 +36,7 @@ function App() {
       if (!token) return; // không có token thì thôi
 
       try {
-        const res = await fetch(`${backendUrl}/api/auth/me`, {
+        const res = await fetch(`${backendUrl}/auth/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

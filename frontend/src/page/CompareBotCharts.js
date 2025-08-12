@@ -55,7 +55,7 @@ const CompareBotCharts = () => {
 
                 while (hasMore) {
                     const offset = data.length;
-                    const res = await axios.get(`${backendUrl}/api/fbt-data?limit=${LIMIT}&offset=${offset}`);
+                    const res = await axios.get(`${backendUrl}/fbt-data?limit=${LIMIT}&offset=${offset}`);
                     const botsObj = res.data.bots || {};
 
                     const transformedBots = Object.entries(botsObj).map(([botName, data], index) => ({

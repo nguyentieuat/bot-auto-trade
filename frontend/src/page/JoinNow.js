@@ -34,7 +34,7 @@ const JoinForm = () => {
     const fetchUserInfo = async () => {
       try {
         const user = JSON.parse(userStr);
-        const res = await fetch(`${backendUrl}/api/users/${user.username}/info`, {
+        const res = await fetch(`${backendUrl}/users/${user.username}/info`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -61,13 +61,13 @@ const JoinForm = () => {
   useEffect(() => {
     const fetchFormInfo = async () => {
       try {
-        const responseBots = await axios.get(`${backendUrl}/api/bots/active`);
+        const responseBots = await axios.get(`${backendUrl}/bots/active`);
         setAvailableBots(responseBots.data || []);
 
-        const responsePackages = await axios.get(`${backendUrl}/api/packages`);
+        const responsePackages = await axios.get(`${backendUrl}/packages`);
         setPackages(responsePackages.data || []);
 
-        const responseTime = await axios.get(`${backendUrl}/api/time-discounts`);
+        const responseTime = await axios.get(`${backendUrl}/time-discounts`);
         setTimeDuration(responseTime.data || []);
 
       } catch (err) {
@@ -118,7 +118,7 @@ const JoinForm = () => {
       try {
         const token = localStorage.getItem('token');
         const response = await axios.post(
-          `${backendUrl}/api/subscriptions/calculate-price`,
+          `${backendUrl}/subscriptions/calculate-price`,
           {
             package_name: selectedPackageName,
             months: selectedDuration,
@@ -218,7 +218,7 @@ const JoinForm = () => {
     try {
       if (isAuthenticated) {
         // Gọi API xác nhận subscription
-        await axios.post(`${backendUrl}/api/confirm-subscription`, {
+        await axios.post(`${backendUrl}/confirm-subscription`, {
           package_name: selectedPackageName,
           months: selectedDuration,
           botsWithPrice: botsWithPrice,
@@ -233,7 +233,7 @@ const JoinForm = () => {
         navigate('/');
       } else {
         // Guest đăng ký
-        await axios.post(`${backendUrl}/api/guest-join`, {
+        await axios.post(`${backendUrl}/guest-join`, {
           full_name: name,
           phone,
           email,

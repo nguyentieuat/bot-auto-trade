@@ -14,7 +14,7 @@ export default function BotSalesChart() {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        fetch(`${backendUrl}/api/admin/analytics/bot-sales`, {
+        fetch(`${backendUrl}/admin/analytics/bot-sales`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },

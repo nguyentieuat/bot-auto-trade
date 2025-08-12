@@ -15,7 +15,7 @@ const InvestmentOrdersPage = () => {
 
     const fetchOrders = async () => {
         try {
-            const res = await axios.get(`${backendUrl}/api/admin/investment-orders`, {
+            const res = await axios.get(`${backendUrl}/admin/investment-orders`, {
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 params: {
                     page,
@@ -43,7 +43,7 @@ const InvestmentOrdersPage = () => {
     const handleAction = async (id, action) => {
         try {
             setLoadingOrderId(id); // NEW: show loading indicator
-            await axios.post(`${backendUrl}/api/admin/investment-orders/${id}`, 
+            await axios.post(`${backendUrl}/admin/investment-orders/${id}`, 
                 { action }, 
                 {
                     headers: { Authorization: `Bearer ${token}` }
