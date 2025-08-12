@@ -78,7 +78,7 @@ const MultiCharts = ({
       )}
 
       {hasMore && (
-        <div className="text-center mt-4">
+        <div className="text-center mt-4" style={{paddingTop: '20px'}}>
           {loading ? (
             <div className="spinner-border text-info" role="status">
               <span className="visually-hidden">Loading more...</span>
