@@ -61,6 +61,13 @@ app.post('/api/subscribe/:username/:botName', authenticateToken, subscribeBot);
 // Admin
 app.use(adminRouter);
 
+app.get('/', (req, res) => {
+  res.send('OK');
+});
+app.get('/health', (req, res) => {
+  res.sendStatus(200);
+});
+
 // Start server
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
