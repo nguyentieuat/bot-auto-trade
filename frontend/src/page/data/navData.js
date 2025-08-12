@@ -1,7 +1,7 @@
 const navItems = [
   { label: 'Home', href: '/' },
   { label: 'XBot Hub', href: '/xbot' },
-  { label: 'Github', href: 'https://github.com', external: true },
+  { label: 'Về chúng tôi', href: '/aboutUs' },
 ];
 
 export default navItems;

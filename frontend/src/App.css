@@ -121,3 +121,12 @@ body::before {
   width: 100%;
   overflow-x: hidden;
 }
+
+.about-us-container a {
+  color: #66ccff;
+  text-decoration: none;
+}
+
+.about-us-container a:hover {
+  text-decoration: underline;
+}

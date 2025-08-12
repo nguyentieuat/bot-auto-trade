@@ -27,16 +27,18 @@ const BacktestStatsCard = ({ stats }) => {
 
     return (
         <div className="bg-dark text-white rounded-3 shadow p-3">
-            <h2 className="text-xl font-semibold mb-4">📊 Performance Stats</h2>
-            <div className="space-y-2 text-sm">
+            <h2 className="text-xl fw-semibold mb-4">📊 Performance Stats</h2>
+            <div className="mb-2 small">
                 {rows.map(({ label, value }) => (
-                    <div key={label} className="grid grid-cols-3">
-                        <span className="text-left font-medium col-span-1">{label}:</span>
-                        <span className="text-center col-span-2">{value}</span>
+                    <div key={label} className="row mb-1 text-start">
+                        <div className="col-8 fw-medium">{label}:</div>
+                        <div className="col-4">{value}</div>
                     </div>
                 ))}
             </div>
         </div>
+
+
     );
 };
 

@@ -94,7 +94,8 @@ const BotDetail = ({ bot, onBack }) => {
 
   const stats = useMemo(() => {
     if (!bot?.data) return null;
-
+    debugger
+    console.log(bot.data)
     if (timeFilter === 'All') return calculateBacktestStats(bot.data);
     if (timeFilter === 'YTD') {
       const startOfYear = new Date(new Date().getFullYear(), 0, 1);
@@ -149,7 +150,7 @@ const BotDetail = ({ bot, onBack }) => {
     }
   };
 
-  const telegramLink = isAuthenticated && isPremiumSubscribed ? channelLinks.premium : channelLinks.free;
+  const linkChannel = isAuthenticated && isPremiumSubscribed ? channelLinks.premium : channelLinks.free;
 
   if (!bot) {
     return (
@@ -188,9 +189,9 @@ const BotDetail = ({ bot, onBack }) => {
               📩 {isPremiumSubscribed ? 'Nhận tín hiệu nâng cao' : 'Nhận tín hiệu miễn phí'} qua Group
             </p>
 
-            {telegramLink ? (
+            {linkChannel ? (
               <a
-                href={telegramLink.replace(/^"|"$/g, '')}
+                href={linkChannel.replace(/^"|"$/g, '')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-success"
