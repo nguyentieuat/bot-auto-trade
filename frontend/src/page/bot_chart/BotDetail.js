@@ -185,7 +185,7 @@ const BotDetail = ({ bot, onBack }) => {
 
           <div className="mt-5 text-center">
             <p className="text-light mb-3">
-              📩 {isPremiumSubscribed ? 'Nhận tín hiệu nâng cao' : 'Nhận tín hiệu miễn phí'} qua Telegram
+              📩 {isPremiumSubscribed ? 'Nhận tín hiệu nâng cao' : 'Nhận tín hiệu miễn phí'} qua Group
             </p>
 
             {telegramLink ? (
@@ -195,10 +195,10 @@ const BotDetail = ({ bot, onBack }) => {
                 rel="noopener noreferrer"
                 className="btn btn-success"
               >
-                👉 Tham gia nhóm Telegram
+                👉 Tham gia Group nhận tín hiệu
               </a>
             ) : (
-              <p className="text-secondary">Không tìm thấy link Telegram</p>
+              <p className="text-secondary">Không tìm thấy link Group tín hiệu</p>
             )}
 
             <p className="mt-2 small" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
