@@ -93,7 +93,7 @@ const AdminTransactions = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {paginate(deposits, depositPage).map(dep => (
+                    {(paginate(deposits, depositPage) || []).map(dep => (
                         <tr key={dep.id}>
                             <td>{dep.username}</td>
                             <td>{dep.amount}</td>
