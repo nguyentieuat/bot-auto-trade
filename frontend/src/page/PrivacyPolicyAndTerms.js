@@ -97,7 +97,7 @@ export default function PrivacyPolicyAndTermsModal({ onClose }) {
 
           <section id="lien-he" style={sectionStyle}>
             <h2>7. Liên hệ</h2>
-            <p>Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ qua email: support@dichvutin.hieu</p>
+            <p>Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ qua email: thanhluan.kma@gmail.com</p>
           </section>
         </main>
 

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import PrivacyPolicyAndTerms from './PrivacyPolicyAndTerms'; // import page
 
 const LoginRegister = () => {
-    const API_URL = process.env.REACT_APP_API_URL;
+    const backendUrl = process.env.REACT_APP_API_URL;
     const navigate = useNavigate();
 
     const [isLogin, setIsLogin] = useState(true);
@@ -49,7 +49,7 @@ const LoginRegister = () => {
 
         setLoading(true);
         try {
-            const url = isLogin ? `${API_URL}/api/login` : `${API_URL}/api/register`;
+            const url = isLogin ? `${backendUrl}/login` : `${backendUrl}/register`;
             const body = isLogin
                 ? { account: form.username, password: form.password }
                 : { username: form.username, password: form.password, email: form.email, phone: form.phone };
