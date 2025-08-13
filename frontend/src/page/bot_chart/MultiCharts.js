@@ -8,6 +8,7 @@ const MultiCharts = ({
   bots,
   viewMode,
   loading,
+  loadMoreLoading,
   error,
   onLoadMore,
   hasMore,
@@ -33,7 +34,13 @@ const MultiCharts = ({
   }, [loading, bots, onRendered]);
 
   if (loading && bots.length === 0) {
-    return <p className="text-light text-center">⏳ Loading all charts...</p>;
+    return (
+      <div className="overlay-loading">
+        <div className="spinner-border text-light" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
@@ -78,8 +85,8 @@ const MultiCharts = ({
       )}
 
       {hasMore && (
-        <div className="text-center mt-4" style={{paddingBottom: '20px'}}>
-          {loading ? (
+        <div className="text-center mt-4" style={{ paddingBottom: '20px' }}>
+          {loadMoreLoading ? (
             <div className="spinner-border text-info" role="status">
               <span className="visually-hidden">Loading more...</span>
             </div>

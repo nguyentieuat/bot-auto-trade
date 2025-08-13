@@ -14,12 +14,14 @@ function Home() {
   const [bots, setBots] = useState([]);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedBot, setSelectedBot] = useState(null);
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('viewMode') || 'grid');
   const [restoring, setRestoring] = useState(false);
   const [modeChanging, setModeChanging] = useState(false);
+
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [loadMoreLoading, setLoadMoreLoading] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -43,7 +45,11 @@ function Home() {
   // Fetch with cache
   const fetchBotsPage = useCallback(async (pageNumber) => {
     try {
-      setLoading(true);
+      if (pageNumber === 0) {
+        setInitialLoading(true);
+      } else {
+        setLoadMoreLoading(true);
+      }
       setError('');
 
       // Nếu pageNumber === 0 => thử load cache
@@ -116,7 +122,11 @@ function Home() {
     } catch (err) {
       setError('Failed to load bots.');
     } finally {
-      setLoading(false);
+      if (pageNumber === 0) {
+        setInitialLoading(false);
+      } else {
+        setLoadMoreLoading(false);
+      }
     }
   }, [bots]);
 
@@ -232,7 +242,7 @@ function Home() {
             </div>
           </div>
 
-          {(loading || restoring || modeChanging) && (
+          {(initialLoading || restoring || modeChanging) && (
             <div className="overlay-loading">
               <div className="spinner-border text-light" role="status">
                 <span className="visually-hidden">Loading...</span>
@@ -242,7 +252,8 @@ function Home() {
           <MultiCharts
             bots={bots}
             viewMode={viewMode}
-            loading={loading}
+            loading={initialLoading}
+            loadMoreLoading={loadMoreLoading}
             error={error}
             onLoadMore={handleLoadMore}
             hasMore={hasMore}
