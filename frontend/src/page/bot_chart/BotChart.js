@@ -34,6 +34,9 @@ const BotChart = ({ data }) => {
     return <p className="text-light text-center">⚠ No data available for this bot.</p>;
   }
 
+  const isDense = data.length > 500;
+  const isMedium = data.length > 100 && data.length <= 500;
+
   // Key mapping
   const datetimeKey = Object.keys(data[0]).find(k => k.toLowerCase().includes('date')) || 'Datetime';
   const gainKey = 'gain';
@@ -106,8 +109,13 @@ const BotChart = ({ data }) => {
       x: {
         type: 'time',
         time: {
-          unit: 'year',
-          tooltipFormat: 'yyyy-MM-dd'
+          unit: isDense ? 'year' : isMedium ? 'month' : 'day', 
+          tooltipFormat: 'dd/MM/yyyy', 
+          displayFormats: {
+            day: 'dd/MM',
+            month: 'MMM yyyy',
+            year: 'yyyy'
+          }
         },
         ticks: {
           color: '#ffffff'
