@@ -17,6 +17,7 @@ import AdminDashboard from './page/admin/AdminDashboard';
 import BotDetailPage from './page/BotDetailPage';
 import CompareBotCharts from './page/CompareBotCharts';
 import AboutUs from './page/AboutUs';
+import ChatBubble from './page/ChatBubble';
 const backendUrl = process.env.REACT_APP_API_URL;
 
 const bgStyle = {
@@ -80,6 +81,8 @@ function App() {
             <Route path="/admin/investment" element={<InvestmentOrdersPage />} />
           </Routes>
         </main>
+        {/* Bong bóng chat dùng chung toàn site */}
+        <ChatBubble />
         <Footer /> {/*  Footer cho mọi trang (nếu cần) */}
       </Router>
     </div>
