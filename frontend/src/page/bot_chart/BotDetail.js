@@ -57,7 +57,7 @@ const BotDetail = ({ bot, onBack }) => {
 
       try {
         const allResults = await Promise.allSettled([...requests, botLinksReq]);
-
+        
         if (isAuth) {
           const [userInfoRes, subscriptionRes, packagesRes] = allResults;
 
@@ -94,8 +94,6 @@ const BotDetail = ({ bot, onBack }) => {
 
   const stats = useMemo(() => {
     if (!bot?.data) return null;
-    debugger
-    console.log(bot.data)
     if (timeFilter === 'All') return calculateBacktestStats(bot.data);
     if (timeFilter === 'YTD') {
       const startOfYear = new Date(new Date().getFullYear(), 0, 1);

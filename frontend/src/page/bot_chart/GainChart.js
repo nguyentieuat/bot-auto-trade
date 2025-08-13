@@ -21,7 +21,6 @@ const COLORS = [
 ];
 
 const GainChart = ({ data, mode = 'day' }) => {
-  debugger
   const groupedMap = new Map();
 
   data.forEach(item => {

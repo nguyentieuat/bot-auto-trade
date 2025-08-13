@@ -25,7 +25,7 @@ const AboutUs = () => {
           Chúng tôi là một nhóm đam mê tài chính và công nghệ, với mục tiêu phát triển các chiến lược đầu tư tự động dựa trên dữ liệu lịch sử, phân tích định lượng và trí tuệ nhân tạo.
         </p>
 
-        <h3 className="mt-5 mb-3 text-center">🤝 Đội Ngũ Phát Triển</h3>
+        {/* <h3 className="mt-5 mb-3 text-center">🤝 Đội Ngũ Phát Triển</h3>
         <div className="row">
           {teamMembers.map((member, index) => (
             <div className="col-md-6 text-center mb-4" key={index}>
@@ -41,7 +41,7 @@ const AboutUs = () => {
               <p>{member.bio}</p>
             </div>
           ))}
-        </div>
+        </div> */}
 
         <div className="mt-5">
           <h4>🎯 Sứ mệnh của chúng tôi</h4>

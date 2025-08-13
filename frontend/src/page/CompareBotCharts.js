@@ -270,7 +270,7 @@ const CompareBotCharts = () => {
                     {selectedBot && !isChartLoading && (
                         <>
                             <div style={{ width: '100%', height: 300 }} className="col-md-6">
-                                <h6>📊 So sánh Tổng Gain theo ngày</h6>
+                                <h6>📊 So sánh Tổng Gain</h6>
                                 <ResponsiveContainer>
                                     <LineChart data={chartData()}>
                                         <CartesianGrid strokeDasharray="3 3" />
