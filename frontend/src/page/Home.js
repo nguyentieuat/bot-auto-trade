@@ -27,32 +27,26 @@ function Home() {
   const location = useLocation();
   const scrollRef = useRef(null);
   const didFetch = useRef(false);
+  const cachedDataRef = useRef(null);
 
-  // Check pathname and sync selectedBot
+  // Sync bot name from URL
   useEffect(() => {
     const parts = location.pathname.split('/');
     if (parts[1] === 'bots' && parts[2]) {
       const botName = decodeURIComponent(parts[2]);
       const found = bots.find((b) => b.name === botName);
-      if (found) {
-        setSelectedBot(found);
-      }
+      if (found) setSelectedBot(found);
     } else {
       setSelectedBot(null);
     }
   }, [location.pathname, bots]);
 
-  // Fetch with cache
+  // Fetch bot data (with caching)
   const fetchBotsPage = useCallback(async (pageNumber) => {
     try {
-      if (pageNumber === 0) {
-        setInitialLoading(true);
-      } else {
-        setLoadMoreLoading(true);
-      }
+      pageNumber === 0 ? setInitialLoading(true) : setLoadMoreLoading(true);
       setError('');
 
-      // Nếu pageNumber === 0 => thử load cache
       if (pageNumber === 0) {
         const cache = localStorage.getItem(CACHE_KEY);
         if (cache) {
@@ -75,13 +69,11 @@ function Home() {
             cachedDataRef.current = transformedBots;
 
             if (location.state?.fromHome) {
-              // Back từ detail → render đúng số trang đã xem
               const lastPage = location.state?.lastPage || 1;
               setBots(transformedBots.slice(0, lastPage * LIMIT));
               setPage(lastPage);
               setHasMore(transformedBots.length > lastPage * LIMIT);
             } else {
-              // Lần đầu vào home → chỉ lấy LIMIT bot đầu
               setBots(transformedBots.slice(0, LIMIT));
               setPage(1);
               setHasMore(hasMore);
@@ -91,7 +83,6 @@ function Home() {
         }
       }
 
-      // Fetch thêm từ API
       const offset = pageNumber * LIMIT;
       const res = await axios.get(`${backendUrl}/fbt-data?limit=${LIMIT}&offset=${offset}`);
       const botsObj = res.data.bots || {};
@@ -116,22 +107,16 @@ function Home() {
         JSON.stringify({
           data: updatedBots,
           timestamp: Date.now(),
-          hasMore: res.data.hasMore
+          hasMore: res.data.hasMore,
         })
       );
     } catch (err) {
       setError('Failed to load bots.');
     } finally {
-      if (pageNumber === 0) {
-        setInitialLoading(false);
-      } else {
-        setLoadMoreLoading(false);
-      }
+      pageNumber === 0 ? setInitialLoading(false) : setLoadMoreLoading(false);
     }
   }, [bots]);
 
-
-  // Initial load only once
   useEffect(() => {
     if (!didFetch.current) {
       didFetch.current = true;
@@ -140,18 +125,13 @@ function Home() {
       const lastPage = parseInt(queryParams.get('lastPage') || '1', 10);
 
       if (isBackFromDetail) {
-        // Fetch lại đủ số trang đã xem
-        for (let p = 0; p < lastPage; p++) {
-          fetchBotsPage(p);
-        }
+        for (let p = 0; p < lastPage; p++) fetchBotsPage(p);
       } else {
-        // Lần đầu load
         fetchBotsPage(0);
       }
     }
-  }, [fetchBotsPage, location.state]);
+  }, [fetchBotsPage, location.search]);
 
-  // Restore scroll when selectedBot is closed
   const handleBack = () => {
     setRestoring(true);
     window.history.pushState({}, '', `/?fromHome=true&lastPage=${page}`);
@@ -163,20 +143,15 @@ function Home() {
       setTimeout(() => window.scrollTo(0, savedScrollY), 0);
     }
   };
-  const cachedDataRef = useRef(null);
+
   const handleLoadMore = () => {
-    // Nếu còn data trong cache chưa render hết
     if (cachedDataRef.current && bots.length < cachedDataRef.current.length) {
-      const nextBots = cachedDataRef.current.slice(
-        bots.length,
-        bots.length + LIMIT
-      );
+      const nextBots = cachedDataRef.current.slice(bots.length, bots.length + LIMIT);
       setBots(prev => [...prev, ...nextBots]);
       setPage(prev => prev + 1);
       const { hasMore: cachedHasMore } = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
       setHasMore(cachedHasMore);
     } else {
-      // Nếu cache hết thì fetch API tiếp
       fetchBotsPage(page);
     }
   };
@@ -196,36 +171,41 @@ function Home() {
     window.history.pushState({}, '', `/bots/${bot.name}`);
   };
 
-  const viewModeLabel = viewMode === 'grid' ? 'Grid View' : 'List View';
-  const viewModeIcon = viewMode === 'grid' ? 'fa-th' : 'fa-list';
-
   const handleChangeViewMode = (mode) => {
-    if (viewMode === mode) return; // Không đổi nếu đang cùng mode
+    if (viewMode === mode) return;
     setModeChanging(true);
     setViewMode(mode);
     localStorage.setItem('viewMode', mode);
-
-    // Giả lập delay nhỏ để spinner hiển thị (300ms)
-    setTimeout(() => {
-      setModeChanging(false);
-    }, 300);
+    setTimeout(() => setModeChanging(false), 300);
   };
+
+  const viewModeLabel = viewMode === 'grid' ? 'Grid View' : 'List View';
+  const viewModeIcon = viewMode === 'grid' ? 'fa-th' : 'fa-list';
+
   return (
     <div ref={scrollRef}>
       {selectedBot ? (
         <BotDetail bot={selectedBot} onBack={handleBack} />
       ) : (
         <>
+          {/* Phần giới thiệu */}
+          <div className="container mt-4">
+            <h2 className="font-tech">🤖 Tổng quan Bot Giao dịch Tự động</h2>
+            <p className="text-light text-center mx-auto" style={{ maxWidth: '720px' }}>
+              Hệ thống này hiển thị các bot giao dịch tự động đang hoạt động. Mỗi bot đại diện cho một chiến lược riêng biệt
+              và biểu đồ thể hiện hiệu suất qua thời gian (<strong>gain</strong>, <strong>total gain</strong>).
+            </p>
+            <p>
+              Hãy đăng ký nhận tín hiệu giao dịch từ các bot để nắm bắt nhanh cơ hội đầu tư.{' '}
+              <a href="/tham-gia" className="text-link">Tham gia ngay.</a>
+            </p>
+          </div>
+
+          {/* Nút chuyển View */}
           <div className="container text-end" style={{ paddingTop: 10, paddingBottom: 10 }}>
             <div className="dropdown d-inline">
-              <button
-                className="btn btn-sm btn-outline-light dropdown-toggle"
-                type="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                <i className={`fas ${viewModeIcon} me-2`}></i>
-                {viewModeLabel}
+              <button className="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i className={`fas ${viewModeIcon} me-2`}></i> {viewModeLabel}
               </button>
               <ul className="dropdown-menu dropdown-menu-end custom-dropdown">
                 <li>
@@ -242,6 +222,7 @@ function Home() {
             </div>
           </div>
 
+          {/* Loading overlay */}
           {(initialLoading || restoring || modeChanging) && (
             <div className="overlay-loading">
               <div className="spinner-border text-light" role="status">
@@ -249,6 +230,8 @@ function Home() {
               </div>
             </div>
           )}
+
+          {/* Danh sách bot */}
           <MultiCharts
             bots={bots}
             viewMode={viewMode}
@@ -259,7 +242,7 @@ function Home() {
             hasMore={hasMore}
             setSelectedBot={setSelectedBot}
             onRendered={handleRendered}
-            onBotClick={handleBotClick} // optional: can pass explicitly
+            onBotClick={handleBotClick}
           />
         </>
       )}
